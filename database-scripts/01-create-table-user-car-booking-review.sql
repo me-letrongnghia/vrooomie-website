@@ -1,4 +1,8 @@
-USE car_rental;
+DROP SCHEMA IF EXISTS `car_rental`;
+
+CREATE SCHEMA `car_rental`;
+
+USE `car_rental`;
 
 CREATE TABLE users (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
@@ -6,6 +10,8 @@ CREATE TABLE users (
     email VARCHAR(100) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     role ENUM('RENTER', 'OWNER', 'ADMIN') NOT NULL,
+    enabled BOOLEAN DEFAULT FALSE,
+    verification_code VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
