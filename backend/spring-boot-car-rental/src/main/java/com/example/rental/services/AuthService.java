@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
@@ -26,8 +27,26 @@ public class AuthService {
     private final EmailService emailService;
 
     public UserDto register(UserRegisterRequest request) {
-        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new RuntimeException("Email already exists");
+//        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+//            throw new RuntimeException("Email already exists");
+//        }
+        Optional<User> existingUserOpt = userRepository.findByEmail(request.getEmail());
+        if (existingUserOpt.isPresent()) {
+            User existingUser = existingUserOpt.get();
+            if (existingUser.isEnabled()) {
+                throw new RuntimeException("Email already exists");
+            } else {
+                // Cập nhật thông tin mới và gửi lại code xác thực
+                existingUser.setFullName(request.getFullName());
+                existingUser.setPassword(passwordEncoder.encode(request.getPassword()));
+                existingUser.setRole(User.Role.valueOf(request.getRole().toUpperCase()));
+                existingUser.setVerificationCode(emailService.generateOtpCode());
+                existingUser.setOtpExpiry(LocalDateTime.now().plusMinutes(1));
+                userRepository.save(existingUser);
+
+                emailService.sendVerificationEmail(existingUser.getEmail(), existingUser.getVerificationCode());
+                return UserMapper.toDTO(existingUser);
+            }
         }
 
         String code = emailService.generateOtpCode();
@@ -42,6 +61,7 @@ public class AuthService {
                 .role(role)
                 .enabled(false)
                 .verificationCode(code)
+                .otpExpiry(LocalDateTime.now().plusMinutes(1))
                 .build();
 
         User savedUser = userRepository.save(user);
@@ -55,9 +75,16 @@ public class AuthService {
         Optional<User> userOpt = userRepository.findByEmail(email);
         if (userOpt.isPresent()) {
             User user = userOpt.get();
+
+            // Kiểm tra mã và thời gian
             if (user.getVerificationCode().equals(code)) {
+                if (user.getOtpExpiry() != null && user.getOtpExpiry().isBefore(LocalDateTime.now())) {
+                    throw new RuntimeException("Verification code has expired");
+                }
+
                 user.setEnabled(true);
                 user.setVerificationCode(null);
+                user.setOtpExpiry(null);
                 userRepository.save(user);
                 return true;
             }

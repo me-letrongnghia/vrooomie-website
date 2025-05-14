@@ -24,13 +24,13 @@ public class AuthController {
         return  ResponseEntity.ok(authService.register(request));
     }
 
-    @PostMapping("/verify")
-    public ResponseEntity<?> verifyAccount(@RequestBody VerificationRequest request) {
-        boolean verified = authService.verify(request.getEmail(), request.getCode());
+    @GetMapping("/verify")
+    public ResponseEntity<String> verifyAccount(@RequestParam String email, @RequestParam String code) {
+        boolean verified = authService.verify(email, code);
         if (verified) {
-            return ResponseEntity.ok(Map.of("message", "Account verified successfully"));
+            return ResponseEntity.ok("Account verified successfully!");
         }
-        return ResponseEntity.status(400).body(Map.of("message", "Invalid code or email"));
+        return ResponseEntity.status(400).body("Invalid or expired verification link.");
     }
 
 

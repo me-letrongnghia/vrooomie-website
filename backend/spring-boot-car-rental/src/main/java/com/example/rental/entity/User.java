@@ -37,6 +37,9 @@ public class User {
 
     private String verificationCode;
 
+    @Column(name = "otp_expiry")
+    private LocalDateTime otpExpiry;
+
     @CreatedDate
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();

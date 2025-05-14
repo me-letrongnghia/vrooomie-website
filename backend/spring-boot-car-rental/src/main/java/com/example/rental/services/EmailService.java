@@ -21,10 +21,12 @@ public class EmailService {
     }
 
     public void sendVerificationEmail(String toEmail, String code) {
+        String verifyUrl = "http://localhost:8080/api/auth/verify?email=" + toEmail + "&code=" + code;
+
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(toEmail);
         message.setSubject("Email Verification");
-        message.setText("Your verification code is: " + code);
+        message.setText("Click the following link to verify your email:\n" + verifyUrl);
         mailSender.send(message);
     }
 }
