@@ -86,6 +86,7 @@ public class AuthService {
 
                 user.setEnabled(true);
                 user.setVerificationCode(null);
+                user.setOtpGeneratedAt(null);
                 user.setOtpExpiry(null);
                 userRepository.save(user);
                 return true;
