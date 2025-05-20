@@ -41,6 +41,7 @@ public class AuthService {
                 existingUser.setPassword(passwordEncoder.encode(request.getPassword()));
                 existingUser.setRole(User.Role.valueOf(request.getRole().toUpperCase()));
                 existingUser.setVerificationCode(emailService.generateOtpCode());
+                existingUser.setOtpGeneratedAt(LocalDateTime.now());
                 existingUser.setOtpExpiry(LocalDateTime.now().plusMinutes(1));
                 userRepository.save(existingUser);
 
@@ -61,6 +62,7 @@ public class AuthService {
                 .role(role)
                 .enabled(false)
                 .verificationCode(code)
+                .otpGeneratedAt(LocalDateTime.now())
                 .otpExpiry(LocalDateTime.now().plusMinutes(1))
                 .build();
 
