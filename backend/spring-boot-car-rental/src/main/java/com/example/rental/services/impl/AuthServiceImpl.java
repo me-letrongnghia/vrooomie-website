@@ -7,7 +7,7 @@ import com.example.rental.dto.UserRegisterRequest;
 import com.example.rental.entity.User;
 import com.example.rental.mapper.UserMapper;
 import com.example.rental.repository.UserRepository;
-import com.example.rental.services.AuthService;
+import com.example.rental.services.IAuthService;
 import com.example.rental.utils.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,12 +18,12 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class AuthServiceImpl implements AuthService {
+public class IAuthServiceImpl implements IAuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
-    private final EmailServiceImpl emailServiceImpl;
+    private final IEmailServiceImpl emailServiceImpl;
 
     public UserDto register(UserRegisterRequest request) {
 //        if (userRepository.findByEmail(request.getEmail()).isPresent()) {

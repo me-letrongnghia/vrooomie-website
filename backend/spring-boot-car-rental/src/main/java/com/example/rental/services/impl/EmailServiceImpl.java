@@ -1,6 +1,6 @@
 package com.example.rental.services.impl;
 
-import com.example.rental.services.EmailService;
+import com.example.rental.services.IEmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -10,7 +10,7 @@ import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
-public class EmailServiceImpl implements EmailService {
+public class IEmailServiceImpl implements IEmailService {
 
     private final JavaMailSender mailSender;
 
