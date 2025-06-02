@@ -14,7 +14,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -29,19 +31,75 @@ public class BookingServiceImpl implements IBookingService {
         Car car = carRepository.findById(request.getCarId())
                 .orElseThrow(() -> new RuntimeException("Car not found"));
 
-        BigDecimal totalPrice = car.getPricePerDay()
-                .multiply(BigDecimal.valueOf(ChronoUnit.DAYS.between(request.getStartDate(), request.getEndDate())));
+        // Kiểm tra trùng thời gian
+        List<Booking> overlapping = bookingRepository.findOverlappingBookings(
+                request.getCarId(), request.getStartDate(), request.getEndDate());
+
+        if (!overlapping.isEmpty()) {
+            throw new RuntimeException("This car is already booked in the selected time range.");
+        }
 
         Booking booking = Booking.builder()
                 .car(car)
                 .renter(renter)
                 .startDate(request.getStartDate())
                 .endDate(request.getEndDate())
-                .totalPrice(totalPrice)
+                .totalPrice(calculateTotal(car.getPricePerDay(), request.getStartDate(), request.getEndDate()))
                 .status(Booking.BookingStatus.PENDING)
                 .build();
 
         bookingRepository.save(booking);
         return BookingMapper.toDto(booking);
+    }
+
+    private BigDecimal calculateTotal(BigDecimal pricePerDay, LocalDate start, LocalDate end) {
+        long days = ChronoUnit.DAYS.between(start, end) + 1;
+        return pricePerDay.multiply(BigDecimal.valueOf(days));
+    }
+
+    @Override
+    public void confirmBooking(Long bookingId, User currentUser) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("Booking not found"));
+
+        if (booking.getStatus().equals(Booking.BookingStatus.CANCELED)) {
+            throw new RuntimeException("This booking has been canceled and cannot be confirmed");
+        }
+
+        if (!booking.getCar().getOwner().getId().equals(currentUser.getId())) {
+            throw new RuntimeException("You are not the owner of this car");
+        }
+
+        if (!booking.getStatus().equals(Booking.BookingStatus.PENDING)) {
+            throw new RuntimeException("Only pending bookings can be confirmed");
+        }
+
+        booking.setStatus(Booking.BookingStatus.CONFIRMED);
+        bookingRepository.save(booking);
+
+        // Optionally: Gửi email thông báo cho người thuê
+    }
+
+    @Override
+    public void cancelBooking(Long bookingId, User currentUser) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("Booking not found"));
+
+        if (booking.getStatus().equals(Booking.BookingStatus.CONFIRMED)) {
+            throw new RuntimeException("This booking has been confirmed and cannot be canceled");
+        }
+
+        if (!booking.getCar().getOwner().getId().equals(currentUser.getId())) {
+            throw new RuntimeException("You are not the owner of this car");
+        }
+
+        if (booking.getStatus().equals(Booking.BookingStatus.CANCELED)) {
+            throw new RuntimeException("Booking is already canceled");
+        }
+
+        booking.setStatus(Booking.BookingStatus.CANCELED);
+        bookingRepository.save(booking);
+
+        // Optionally: Gửi email thông báo cho người thuê
     }
 }

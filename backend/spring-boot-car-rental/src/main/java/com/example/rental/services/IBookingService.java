@@ -6,4 +6,6 @@ import com.example.rental.entity.User;
 
 public interface IBookingService {
     BookingDto createBooking(BookingRequest request, User renter);
+    void confirmBooking(Long bookingId, User currentUser);
+    void cancelBooking(Long bookingId, User currentUser);
 }
