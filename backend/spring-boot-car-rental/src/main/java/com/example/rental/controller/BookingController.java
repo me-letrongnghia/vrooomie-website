@@ -5,11 +5,9 @@ import com.example.rental.entity.User;
 import com.example.rental.services.IBookingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/bookings")
@@ -23,4 +21,19 @@ public class BookingController {
                                            @AuthenticationPrincipal User user) {
         return ResponseEntity.ok(iBookingService.createBooking(request, user));
     }
+
+    @PutMapping("/{id}/confirm")
+    @PreAuthorize("hasRole('OWNER')")
+    public ResponseEntity<?> confirmBooking(@PathVariable Long id, @AuthenticationPrincipal User currentUser) {
+        iBookingService.confirmBooking(id, currentUser);
+        return ResponseEntity.ok("Booking confirmed.");
+    }
+
+    @PutMapping("/{id}/cancel")
+    @PreAuthorize("hasRole('OWNER')")
+    public ResponseEntity<?> cancelBooking(@PathVariable Long id, @AuthenticationPrincipal User currentUser) {
+        iBookingService.cancelBooking(id, currentUser);
+        return ResponseEntity.ok("Booking canceled.");
+    }
+
 }
