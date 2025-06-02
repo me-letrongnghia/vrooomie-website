@@ -6,7 +6,7 @@ import com.example.rental.entity.User;
 
 import java.util.List;
 
-public interface CarService {
+public interface ICarService {
     List<CarDto> getAllCars();
     CarDto getCarById(Long id);
     CarDto createCar(CarRequest request, User owner);

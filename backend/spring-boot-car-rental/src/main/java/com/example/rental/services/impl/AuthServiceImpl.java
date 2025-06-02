@@ -18,12 +18,12 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class IAuthServiceImpl implements IAuthService {
+public class AuthServiceImpl implements IAuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
-    private final IEmailServiceImpl emailServiceImpl;
+    private final EmailServiceImpl emailServiceImpl;
 
     public UserDto register(UserRegisterRequest request) {
 //        if (userRepository.findByEmail(request.getEmail()).isPresent()) {

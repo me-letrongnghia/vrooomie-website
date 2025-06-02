@@ -5,7 +5,7 @@ import com.example.rental.dto.LoginResponse;
 import com.example.rental.dto.UserDto;
 import com.example.rental.dto.UserRegisterRequest;
 
-public interface AuthService {
+public interface IAuthService {
     UserDto register(UserRegisterRequest request);
     boolean verify(String email, String code);
     LoginResponse login(LoginRequest request);

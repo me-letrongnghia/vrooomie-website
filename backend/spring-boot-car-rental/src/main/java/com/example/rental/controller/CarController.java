@@ -3,7 +3,7 @@ package com.example.rental.controller;
 import com.example.rental.dto.CarRequest;
 import com.example.rental.dto.CarDto;
 import com.example.rental.entity.User;
-import com.example.rental.services.impl.CarServiceImpl;
+import com.example.rental.services.ICarService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -16,31 +16,31 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CarController {
 
-    private final CarServiceImpl carServiceImpl;
+    private final ICarService iCarService;
 
     @GetMapping
     public List<CarDto> getAllCars() {
-        return carServiceImpl.getAllCars();
+        return iCarService.getAllCars();
     }
 
     @GetMapping("/{id}")
     public CarDto getCarById(@PathVariable Long id) {
-        return carServiceImpl.getCarById(id);
+        return iCarService.getCarById(id);
     }
 
     @PostMapping("/create")
     public CarDto createCar(@RequestBody CarRequest request, @AuthenticationPrincipal User owner) {
-        return carServiceImpl.createCar(request, owner);
+        return iCarService.createCar(request, owner);
     }
 
     @PutMapping("/{id}")
     public CarDto updateCar(@PathVariable Long id, @RequestBody CarDto carDto) {
-        return carServiceImpl.updateCar(id, carDto);
+        return iCarService.updateCar(id, carDto);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCar(@PathVariable Long id) {
-        carServiceImpl.deleteCar(id);
+        iCarService.deleteCar(id);
         return ResponseEntity.noContent().build();
     }
 }

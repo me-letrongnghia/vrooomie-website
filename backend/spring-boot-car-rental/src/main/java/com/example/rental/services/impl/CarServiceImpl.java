@@ -6,7 +6,7 @@ import com.example.rental.entity.Car;
 import com.example.rental.entity.User;
 import com.example.rental.mapper.CarMapper;
 import com.example.rental.repository.CarRepository;
-import com.example.rental.services.CarService;
+import com.example.rental.services.ICarService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class CarServiceImpl implements CarService {
+public class CarServiceImpl implements ICarService {
 
     private final CarRepository carRepository;
 

@@ -3,7 +3,7 @@ package com.example.rental.controller;
 import com.example.rental.dto.*;
 import com.example.rental.entity.User;
 import com.example.rental.mapper.UserMapper;
-import com.example.rental.services.impl.AuthServiceImpl;
+import com.example.rental.services.IAuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -15,16 +15,16 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final AuthServiceImpl authServiceImpl;
+    private final IAuthService iAuthService;
 
     @PostMapping("/register")
     public ResponseEntity<UserDto> register(@RequestBody @Valid UserRegisterRequest request) {
-        return  ResponseEntity.ok(authServiceImpl.register(request));
+        return  ResponseEntity.ok(iAuthService.register(request));
     }
 
     @GetMapping("/verify")
     public ResponseEntity<String> verifyAccount(@RequestParam String email, @RequestParam String code) {
-        boolean verified = authServiceImpl.verify(email, code);
+        boolean verified = iAuthService.verify(email, code);
         if (verified) {
             return ResponseEntity.ok("Account verified successfully!");
         }
@@ -34,7 +34,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody @Valid LoginRequest request) {
-        return ResponseEntity.ok(authServiceImpl.login(request));
+        return ResponseEntity.ok(iAuthService.login(request));
     }
 
     @GetMapping("/me")
