@@ -7,7 +7,7 @@ import lombok.Data;
 import java.math.BigDecimal;
 
 @Data
-public class CarCreateRequest {
+public class CarRequest {
     @NotBlank
     private String brand;
     @NotBlank private String model;

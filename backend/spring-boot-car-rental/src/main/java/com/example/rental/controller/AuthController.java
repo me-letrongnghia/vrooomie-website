@@ -3,30 +3,28 @@ package com.example.rental.controller;
 import com.example.rental.dto.*;
 import com.example.rental.entity.User;
 import com.example.rental.mapper.UserMapper;
-import com.example.rental.services.AuthService;
+import com.example.rental.services.impl.AuthServiceImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
-
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final AuthService authService;
+    private final AuthServiceImpl authServiceImpl;
 
     @PostMapping("/register")
     public ResponseEntity<UserDto> register(@RequestBody @Valid UserRegisterRequest request) {
-        return  ResponseEntity.ok(authService.register(request));
+        return  ResponseEntity.ok(authServiceImpl.register(request));
     }
 
     @GetMapping("/verify")
     public ResponseEntity<String> verifyAccount(@RequestParam String email, @RequestParam String code) {
-        boolean verified = authService.verify(email, code);
+        boolean verified = authServiceImpl.verify(email, code);
         if (verified) {
             return ResponseEntity.ok("Account verified successfully!");
         }
@@ -36,7 +34,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody @Valid LoginRequest request) {
-        return ResponseEntity.ok(authService.login(request));
+        return ResponseEntity.ok(authServiceImpl.login(request));
     }
 
     @GetMapping("/me")

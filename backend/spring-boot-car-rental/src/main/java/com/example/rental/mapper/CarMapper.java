@@ -1,6 +1,6 @@
 package com.example.rental.mapper;
 
-import com.example.rental.dto.CarCreateRequest;
+import com.example.rental.dto.CarRequest;
 import com.example.rental.dto.CarDto;
 import com.example.rental.entity.Car;
 import com.example.rental.entity.User;
@@ -22,7 +22,7 @@ public class CarMapper {
                 .build();
     }
 
-    public static Car toEntity(CarCreateRequest req, User owner) {
+    public static Car toEntity(CarRequest req, User owner) {
         return Car.builder()
                 .owner(owner)
                 .brand(req.getBrand())
