@@ -10,6 +10,7 @@ import com.example.rental.repository.BookingRepository;
 import com.example.rental.repository.CarRepository;
 import com.example.rental.repository.UserRepository;
 import com.example.rental.services.IBookingService;
+import com.example.rental.services.IEmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +26,7 @@ public class BookingServiceImpl implements IBookingService {
     private final BookingRepository bookingRepository;
     private final CarRepository carRepository;
     private final UserRepository userRepository;
+    private final IEmailService iEmailService;
 
     @Override
     public BookingDto createBooking(BookingRequest request, User renter) {
@@ -49,6 +51,15 @@ public class BookingServiceImpl implements IBookingService {
                 .build();
 
         bookingRepository.save(booking);
+
+        // Optionally: Gửi email thông báo cho chủ xe
+        iEmailService.sendBookingStatusNotification(
+                car.getOwner(),
+                booking,
+                "Có booking mới cho xe bạn!",
+                "Một người dùng vừa đặt xe của bạn. Vui lòng xem xét và duyệt/hủy booking."
+        );
+
         return BookingMapper.toDto(booking);
     }
 
@@ -78,6 +89,12 @@ public class BookingServiceImpl implements IBookingService {
         bookingRepository.save(booking);
 
         // Optionally: Gửi email thông báo cho người thuê
+        iEmailService.sendBookingStatusNotification(
+                booking.getRenter(),
+                booking,
+                "Booking của bạn đã được duyệt!",
+                "Chủ xe đã chấp nhận booking. Hãy chuẩn bị cho chuyến đi nhé!"
+        );
     }
 
     @Override
@@ -101,5 +118,11 @@ public class BookingServiceImpl implements IBookingService {
         bookingRepository.save(booking);
 
         // Optionally: Gửi email thông báo cho người thuê
+        iEmailService.sendBookingStatusNotification(
+                booking.getRenter(),
+                booking,
+                "Booking của bạn đã bị hủy",
+                "Rất tiếc, chủ xe đã hủy booking của bạn. Vui lòng thử đặt xe khác."
+        );
     }
 }
