@@ -14,7 +14,14 @@ public class BookingMapper {
         return BookingDto.builder()
                 .id(booking.getId())
                 .carId(booking.getCar().getId())
+                .carBrand(booking.getCar().getBrand())
+                .carModel(booking.getCar().getModel())
+                .carLicensePlate(booking.getCar().getLicensePlate())
+
                 .renterId(booking.getRenter().getId())
+                .renterName(booking.getRenter().getFullName())
+                .renterEmail(booking.getRenter().getEmail())
+
                 .startDate(booking.getStartDate())
                 .endDate(booking.getEndDate())
                 .status(booking.getStatus().name())

@@ -1,5 +1,6 @@
 package com.example.rental.controller;
 
+import com.example.rental.dto.BookingDto;
 import com.example.rental.dto.BookingRequest;
 import com.example.rental.entity.User;
 import com.example.rental.services.IBookingService;
@@ -8,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/bookings")
@@ -36,4 +39,14 @@ public class BookingController {
         return ResponseEntity.ok("Booking canceled.");
     }
 
+    @GetMapping("/my")
+    public ResponseEntity<List<BookingDto>> getMyBookings(@AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(iBookingService.getBookingsByRenter(user));
+    }
+
+    @GetMapping("/owner/bookings")
+    public ResponseEntity<?> getBookingsForOwnedCars(@AuthenticationPrincipal User owner) {
+        List<BookingDto> bookings = iBookingService.getBookingsForOwnedCars(owner);
+        return ResponseEntity.ok(bookings);
+    }
 }

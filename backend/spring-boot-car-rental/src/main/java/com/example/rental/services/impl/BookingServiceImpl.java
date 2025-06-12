@@ -18,6 +18,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -124,5 +125,21 @@ public class BookingServiceImpl implements IBookingService {
                 "Booking của bạn đã bị hủy",
                 "Rất tiếc, chủ xe đã hủy booking của bạn. Vui lòng thử đặt xe khác."
         );
+    }
+
+    @Override
+    public List<BookingDto> getBookingsByRenter(User renter) {
+        List<Booking> bookings = bookingRepository.findByRenter(renter);
+        return bookings.stream()
+                .map(BookingMapper::toDto)
+                .toList();
+    }
+
+    @Override
+    public List<BookingDto> getBookingsForOwnedCars(User owner) {
+        List<Booking> bookings = bookingRepository.findByCarOwner(owner);
+        return bookings.stream()
+                .map(BookingMapper::toDto)
+                .collect(Collectors.toList());
     }
 }

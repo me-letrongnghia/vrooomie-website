@@ -15,7 +15,14 @@ import java.time.LocalDate;
 public class BookingDto {
     private Long id;
     private Long carId;
+    private String carBrand;
+    private String carModel;
+    private String carLicensePlate;
+
     private Long renterId;
+    private String renterName;
+    private String renterEmail;
+
     private LocalDate startDate;
     private LocalDate endDate;
     private String status;
