@@ -12,4 +12,5 @@ public interface IBookingService {
     void cancelBooking(Long bookingId, User currentUser);
     List<BookingDto> getBookingsByRenter(User renter);
     List<BookingDto> getBookingsForOwnedCars(User owner);
+    List<BookingDto> getBookingsForOwnedCarsByStatus(User owner, String status);
 }

@@ -142,4 +142,26 @@ public class BookingServiceImpl implements IBookingService {
                 .map(BookingMapper::toDto)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public List<BookingDto> getBookingsForOwnedCarsByStatus(User owner, String status) {
+
+        List<Booking> bookings;
+
+        if (status == null || status.isBlank()) {
+            bookings = bookingRepository.findByCarOwner(owner);
+        } else {
+            Booking.BookingStatus bookingStatus;
+            try {
+                bookingStatus = Booking.BookingStatus.valueOf(status.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                throw new RuntimeException("Invalid booking status: " + status);
+            }
+            bookings = bookingRepository.findByCarOwnerAndStatus(owner, bookingStatus);
+        }
+
+        return bookings.stream()
+                .map(BookingMapper::toDto)
+                .collect(Collectors.toList());
+    }
 }

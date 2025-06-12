@@ -49,4 +49,11 @@ public class BookingController {
         List<BookingDto> bookings = iBookingService.getBookingsForOwnedCars(owner);
         return ResponseEntity.ok(bookings);
     }
+
+    @GetMapping("/owner")
+    public ResponseEntity<?> getBookingsForOwner(@AuthenticationPrincipal User owner,
+                                                 @RequestParam(required = false) String status) {
+        List<BookingDto> bookings = iBookingService.getBookingsForOwnedCarsByStatus(owner, status);
+        return ResponseEntity.ok(bookings);
+    }
 }
