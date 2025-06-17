@@ -1,0 +1,59 @@
+.vrooomie-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 48px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  font-family: 'Inter', Arial, sans-serif;
+}
+
+.vrooomie-header .logo {
+  display: flex;
+  align-items: center;
+  font-weight: bold;
+  font-size: 2rem;
+  color: #222;
+  cursor: pointer;
+}
+
+.vrooomie-header .logo img {
+  height: 40px;
+  margin-right: 12px;
+}
+
+.vrooomie-header nav a {
+  margin: 0 16px;
+  color: #222;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.vrooomie-header .header-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.vrooomie-header .icon {
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.vrooomie-header .user-avatar {
+  background: #ffb300;
+  color: #fff;
+  border-radius: 50%;
+  padding: 8px 12px;
+  font-weight: bold;
+  margin-right: 8px;
+}
+
+.vrooomie-header .user-name {
+  font-weight: 500;
+}
+
+.vrooomie-header .dropdown {
+  font-size: 1rem;
+  margin-left: 4px;
+}
