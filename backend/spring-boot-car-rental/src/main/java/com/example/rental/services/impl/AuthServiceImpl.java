@@ -108,6 +108,8 @@ public class AuthServiceImpl implements IAuthService {
 
         String token = jwtUtil.generateToken(user);
 
-        return new LoginResponse(token);
+        String email = user.getEmail();
+
+        return new LoginResponse(token, email);
     }
 }

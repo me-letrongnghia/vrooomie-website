@@ -32,7 +32,6 @@ public class AuthController {
         return ResponseEntity.status(400).body("Invalid or expired verification link.");
     }
 
-
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody @Valid LoginRequest request) {
         return ResponseEntity.ok(iAuthService.login(request));

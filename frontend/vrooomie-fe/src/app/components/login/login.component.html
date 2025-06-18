@@ -1,0 +1,41 @@
+<div class="login-modal" (click)="onClose()">
+  <div class="login-form" (click)="$event.stopPropagation()">
+    <button class="close-button" (click)="onClose()">✕</button>
+    <h2>Đăng nhập</h2>
+
+    <form [formGroup]="loginForm" (ngSubmit)="submitForm()"> 
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" placeholder="" formControlName="email" required />
+      </div>
+
+      <div class="form-group">
+        <label for="password">Mật khẩu</label>
+        <div class="password-field">
+          <input type="password" id="password" name="password" placeholder="" formControlName="password" required />
+        </div>
+      </div>
+
+      <div class="forgot-password">
+        <a href="#">Quên mật khẩu?</a>
+      </div>
+
+      <button type="submit" class="login-submit-button">Đăng nhập</button>
+    </form>
+
+    <div class="register-prompt">
+      Bạn chưa là thành viên? <a href="#" class="register-link">Đăng ký ngay</a>
+    </div>
+
+    <div class="social-login">
+      <button class="social-button facebook">
+        <span class="social-icon">f</span>
+        Facebook
+      </button>
+      <button class="social-button google">
+        <span class="social-icon">G</span>
+        Google
+      </button>
+    </div>
+  </div>
+</div>

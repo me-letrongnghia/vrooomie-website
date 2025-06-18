@@ -13,18 +13,18 @@
   align-items: center;
   font-weight: bold;
   font-size: 2rem;
-  color: #222;
+  color: #000000;
   cursor: pointer;
 }
 
 .vrooomie-header .logo img {
-  height: 40px;
+  height: 30px;
   margin-right: 12px;
 }
 
 .vrooomie-header nav a {
   margin: 0 16px;
-  color: #222;
+  color: #000000;
   text-decoration: none;
   font-weight: 500;
 }
@@ -32,12 +32,18 @@
 .vrooomie-header .header-actions {
   display: flex;
   align-items: center;
-  gap: 16px;
 }
 
-.vrooomie-header .icon {
+.bell-icon i {
   font-size: 1.2rem;
   cursor: pointer;
+  margin-right: 26px;
+}
+
+.cmt-icon i {
+  font-size: 1.2rem;
+  cursor: pointer;
+  margin-right: 20px;
 }
 
 .vrooomie-header .user-avatar {
