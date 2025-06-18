@@ -1,0 +1,59 @@
+<div class="register-modal" (click)="onClose()">
+  <div class="register-form" (click)="$event.stopPropagation()">
+    <button class="close-button" (click)="onClose()">✕</button>
+    <h2>Đăng ký</h2>
+    
+    <form>
+      <div class="form-group">
+        <label for="phone">Số điện thoại</label>
+        <input type="tel" id="phone" name="phone" placeholder="" />
+      </div>
+      
+      <div class="form-group">
+        <label for="displayName">Tên hiển thị</label>
+        <input type="text" id="displayName" name="displayName" placeholder="" />
+      </div>
+      
+      <div class="form-group">
+        <label for="password">Mật khẩu</label>
+        <div class="password-field">
+          <input type="password" id="password" name="password" placeholder="" />
+          <button type="button" class="toggle-password">👁</button>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="confirmPassword">Mật khẩu</label>
+        <div class="password-field">
+          <input type="password" id="confirmPassword" name="confirmPassword" placeholder="" />
+          <button type="button" class="toggle-password">👁</button>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="referralCode">Mã giới thiệu (nếu có)</label>
+        <input type="text" id="referralCode" name="referralCode" placeholder="" />
+      </div>
+      
+      <div class="terms-checkbox">
+        <input type="checkbox" id="terms" name="terms" />
+        <label for="terms">
+          Tôi đã đọc và đồng ý với <a href="#" class="terms-link">Chính sách & quy định</a> và <a href="#" class="privacy-link">Chính sách bảo vệ dữ liệu cá nhân</a> của Mioto.
+        </label>
+      </div>
+      
+      <button type="submit" class="register-submit-button">Đăng ký</button>
+    </form>
+    
+    <div class="social-login">
+      <button class="social-button facebook">
+        <span class="social-icon">f</span>
+        Facebook
+      </button>
+      <button class="social-button google">
+        <span class="social-icon">G</span>
+        Google
+      </button>
+    </div>
+  </div>
+</div>
