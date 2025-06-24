@@ -24,16 +24,16 @@
     </form>
 
     <div class="register-prompt">
-      Bạn chưa là thành viên? <a href="#" class="register-link">Đăng ký ngay</a>
+      Bạn chưa là thành viên? <a href="#" class="register-link" (click)="onSwitchToRegister(); $event.preventDefault()">Đăng ký ngay</a>
     </div>
 
     <div class="social-login">
       <button class="social-button facebook">
-        <span class="social-icon">f</span>
+        <span class="social-icon"><i class="fa-brands fa-facebook-f"></i></span>
         Facebook
       </button>
       <button class="social-button google">
-        <span class="social-icon">G</span>
+        <span class="social-icon"><i class="fa-brands fa-google"></i></span>
         Google
       </button>
     </div>

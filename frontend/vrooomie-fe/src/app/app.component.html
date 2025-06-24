@@ -1,7 +1,7 @@
 <!-- Header -->
 <header class="vrooomie-header">
   <div class="logo">
-    <img routerLink="" src="https://www.mioto.vn/static/media/logo-full.ea382559.png" alt="VROOOMIE Logo" />
+    <img routerLink="" src="https://www.mioto.vn/static/media/logo-full.ea382559.png" alt="VROOOMIE Logo"/>
   </div>
   <nav>
     <a routerLink="/about-us">Về Vrooomie</a>
@@ -11,13 +11,24 @@
   <div class="header-actions">
     <span class="bell-icon"><i class="fa-regular fa-bell"></i></span>
     <span class="cmt-icon"><i class="fa-regular fa-comment"></i></span>
-    <app-register-status></app-register-status>
-    <app-login-status></app-login-status>
+    <button class="register-button" (click)="showRegister()">Đăng ký</button>
+    <button class="login-button" (click)="showLogin()">Đăng nhập</button>
   </div>
 </header>
 
 <!-- Router-outlet -->
 <router-outlet></router-outlet>
+
+<!-- Modals -->
+<app-login *ngIf="isLoginVisible" 
+           (close)="hideLogin()" 
+           (switchToRegister)="onSwitchToRegister()">
+</app-login>
+
+<app-register *ngIf="isRegisterVisible" 
+              (close)="hideRegister()" 
+              (switchToLogin)="onSwitchToLogin()">
+</app-register>
 
 <!-- Footer -->
 <footer></footer>

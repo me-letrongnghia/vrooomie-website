@@ -10,14 +10,15 @@ import { AuthService } from '../../services/auth.service';
   styleUrl: './login.component.css'
 })
 export class LoginComponent implements OnInit, OnDestroy {
-  
+
   @Output() close = new EventEmitter<void>();
+  @Output() switchToRegister = new EventEmitter<void>();
 
   loginForm: FormGroup = new FormGroup<any>({});
 
   constructor(private authService: AuthService,
-              private formBuilder: FormBuilder,
-              private router: Router) {}
+    private formBuilder: FormBuilder,
+    private router: Router) { }
 
   ngOnInit(): void {
     // Disable body scroll when modal opens
@@ -69,6 +70,10 @@ export class LoginComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     // Re-enable body scroll when modal closes
     document.body.style.overflow = 'auto';
+  }
+
+  onSwitchToRegister() {
+    this.switchToRegister.emit();
   }
 
   onClose() {

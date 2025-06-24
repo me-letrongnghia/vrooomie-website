@@ -3,36 +3,38 @@
     <button class="close-button" (click)="onClose()">✕</button>
     <h2>Đăng ký</h2>
     
-    <form>
-      <div class="form-group">
-        <label for="phone">Số điện thoại</label>
-        <input type="tel" id="phone" name="phone" placeholder="" />
-      </div>
-      
+    <form [formGroup]="registerForm" (ngSubmit)="submitForm()">
+
       <div class="form-group">
         <label for="displayName">Tên hiển thị</label>
-        <input type="text" id="displayName" name="displayName" placeholder="" />
+        <input type="text" id="fullName" name="fullName" placeholder="" formControlName="fullName" required />
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" placeholder="" formControlName="email" required />
       </div>
       
       <div class="form-group">
         <label for="password">Mật khẩu</label>
         <div class="password-field">
-          <input type="password" id="password" name="password" placeholder="" />
-          <button type="button" class="toggle-password">👁</button>
+          <input type="password" id="password" name="password" placeholder="" formControlName="password" required />
         </div>
       </div>
       
       <div class="form-group">
         <label for="confirmPassword">Mật khẩu</label>
         <div class="password-field">
-          <input type="password" id="confirmPassword" name="confirmPassword" placeholder="" />
-          <button type="button" class="toggle-password">👁</button>
+          <input type="password" id="confirmPassword" name="confirmPassword" placeholder="" formControlName="confirmPassword" required />
         </div>
       </div>
-      
+
       <div class="form-group">
-        <label for="referralCode">Mã giới thiệu (nếu có)</label>
-        <input type="text" id="referralCode" name="referralCode" placeholder="" />
+        <label for="role">Bạn muốn?</label>
+        <select id="role" name="role" formControlName="role" required>
+          <option value="RENTER">Thuê xe</option>
+          <option value="OWNER">Cho thuê xe</option>
+        </select>
       </div>
       
       <div class="terms-checkbox">
@@ -45,13 +47,17 @@
       <button type="submit" class="register-submit-button">Đăng ký</button>
     </form>
     
+    <div class="login-prompt">
+      Đã có tài khoản? <a href="#" class="login-link" (click)="onSwitchToLogin(); $event.preventDefault()">Đăng nhập ngay</a>
+    </div>
+    
     <div class="social-login">
       <button class="social-button facebook">
-        <span class="social-icon">f</span>
+        <span class="social-icon"><i class="fa-brands fa-facebook-f"></i></span>
         Facebook
       </button>
       <button class="social-button google">
-        <span class="social-icon">G</span>
+        <span class="social-icon"><i class="fa-brands fa-google"></i></span>
         Google
       </button>
     </div>

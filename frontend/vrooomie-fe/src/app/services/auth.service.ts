@@ -25,4 +25,9 @@ export class AuthService {
         })
       );
   }
+
+  // Register method
+  register(registerRequest: any): Observable<any> {
+    return this.httpClient.post(`${this.authUrl}/register`, registerRequest);
+  }
 }
