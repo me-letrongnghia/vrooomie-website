@@ -3,7 +3,7 @@ package com.example.rental.services.impl;
 import com.example.rental.dto.LoginRequest;
 import com.example.rental.dto.LoginResponse;
 import com.example.rental.dto.UserDto;
-import com.example.rental.dto.UserRegisterRequest;
+import com.example.rental.dto.RegisterRequest;
 import com.example.rental.entity.User;
 import com.example.rental.mapper.UserMapper;
 import com.example.rental.repository.UserRepository;
@@ -25,7 +25,7 @@ public class AuthServiceImpl implements IAuthService {
     private final JwtUtil jwtUtil;
     private final EmailServiceImpl emailServiceImpl;
 
-    public UserDto register(UserRegisterRequest request) {
+    public UserDto register(RegisterRequest request) {
 //        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
 //            throw new RuntimeException("Email already exists");
 //        }
