@@ -1,4 +1,5 @@
-<div class="register-modal" (click)="onClose()">
+<!-- Register Form Modal -->
+<div class="register-modal" (click)="onClose()" *ngIf="!showSuccessModal && !showErrorModal">
   <div class="register-form" (click)="$event.stopPropagation()">
     <button class="close-button" (click)="onClose()">✕</button>
     <h2>Đăng ký</h2>
@@ -8,11 +9,17 @@
       <div class="form-group">
         <label for="displayName">Tên hiển thị</label>
         <input type="text" id="fullName" name="fullName" placeholder="" formControlName="fullName" required />
+        <div class="input-requirements" *ngIf="fullName?.invalid && (fullName?.dirty || fullName?.touched)">
+          <small>Tên hiển thị tối thiểu 3 ký tự</small>
+        </div>
       </div>
 
       <div class="form-group">
         <label for="email">Email</label>
         <input type="email" id="email" name="email" placeholder="" formControlName="email" required />
+        <div class="input-requirements" *ngIf="email?.invalid && (email?.dirty || email?.touched)">
+          <small>Vui lòng nhập email hợp lệ</small>
+        </div>
       </div>
       
       <div class="form-group">
@@ -20,12 +27,21 @@
         <div class="password-field">
           <input type="password" id="password" name="password" placeholder="" formControlName="password" required />
         </div>
+        <div class="input-requirements" *ngIf="password?.invalid && (password?.dirty || password?.touched)">
+          <small>Mật khẩu tối thiểu 8 ký tự</small>
+        </div>
+        <div class="input-requirements" *ngIf="password?.invalid && (password?.dirty || password?.touched)">
+          <small>Bao gồm ít nhất 1 kí tự in hoa và 1 chữ số</small>
+        </div>
       </div>
       
       <div class="form-group">
-        <label for="confirmPassword">Mật khẩu</label>
+        <label for="confirmPassword">Nhập lại mật khẩu</label>
         <div class="password-field">
           <input type="password" id="confirmPassword" name="confirmPassword" placeholder="" formControlName="confirmPassword" required />
+        </div>
+        <div class="input-requirements" *ngIf="confirmPassword?.invalid && (confirmPassword?.dirty || confirmPassword?.touched)">
+          <small>Vui lòng xác nhận mật khẩu</small>
         </div>
       </div>
 
@@ -35,16 +51,19 @@
           <option value="RENTER">Thuê xe</option>
           <option value="OWNER">Cho thuê xe</option>
         </select>
+        <div class="input-requirements" *ngIf="role?.invalid && (role?.dirty || role?.touched)">
+          <small>Vui lòng không để trống</small>
+        </div>
       </div>
       
       <div class="terms-checkbox">
-        <input type="checkbox" id="terms" name="terms" />
+        <input type="checkbox" id="terms" name="terms" formControlName="terms" required />
         <label for="terms">
-          Tôi đã đọc và đồng ý với <a href="#" class="terms-link">Chính sách & quy định</a> và <a href="#" class="privacy-link">Chính sách bảo vệ dữ liệu cá nhân</a> của Mioto.
+          Tôi đã đọc và đồng ý với <a href="#" class="terms-link">Chính sách & quy định</a> và <a href="#" class="privacy-link">Chính sách bảo vệ dữ liệu cá nhân</a> của Vrooomie.
         </label>
       </div>
       
-      <button type="submit" class="register-submit-button">Đăng ký</button>
+      <button type="submit" class="register-submit-button" [disabled]="registerForm.invalid">Đăng ký</button>
     </form>
     
     <div class="login-prompt">
@@ -60,6 +79,77 @@
         <span class="social-icon"><i class="fa-brands fa-google"></i></span>
         Google
       </button>
+    </div>
+  </div>
+</div>
+
+<!-- Success Modal -->
+<div class="success-modal" *ngIf="showSuccessModal" (click)="closeSuccessModal()">
+  <div class="success-content" (click)="$event.stopPropagation()">
+    <div class="success-icon">
+      <i class="fa-solid fa-circle-check"></i>
+    </div>
+    
+    <h2 class="success-title">Đăng ký thành công!</h2>
+    
+    <div class="success-message">
+      <p class="email-message">
+        Chúng tôi đã gửi một email xác thực đến địa chỉ:
+      </p>
+      <p class="user-email">{{ userEmail }}</p>
+      <p class="instruction">
+        Vui lòng kiểm tra email và nhấp vào liên kết xác thực để kích hoạt tài khoản của bạn.
+      </p>
+    </div>
+    
+    <div class="success-actions">
+      <button class="continue-button" (click)="closeSuccessModal()">
+        Tiếp tục đăng nhập
+      </button>
+    </div>
+    
+    <div class="email-tips">
+      <p class="tips-title">💡 Không thấy email?</p>
+      <ul class="tips-list">
+        <li>Kiểm tra thư mục spam/junk mail</li>
+        <li>Đảm bảo địa chỉ email được nhập chính xác</li>
+        <li>Email có thể mất vài phút để được gửi đến</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- Error Modal -->
+<div class="error-modal" *ngIf="showErrorModal" (click)="closeErrorModal()">
+  <div class="error-content" (click)="$event.stopPropagation()">
+    <div class="error-icon">
+      <i class="fa-solid fa-circle-xmark"></i>
+    </div>
+    
+    <h2 class="error-title">Đăng ký thất bại!</h2>
+    
+    <div class="error-message">
+      <p class="main-error-message">{{ errorMessage }}</p>
+      <p class="error-instruction">
+        Vui lòng kiểm tra lại thông tin và thử lại.
+      </p>
+    </div>
+    
+    <div class="error-actions">
+      <button class="retry-button" (click)="closeErrorModal()">
+        Thử lại
+      </button>
+    </div>
+    
+    <div class="error-help">
+      <p class="help-title">💡 Đảm bảo:</p>
+      <ul class="help-list">
+        <li>Điền đầy đủ thông tin theo yêu cầu</li>
+        <li>Kiểm tra xem email đã được sử dụng chưa</li>
+        <li>Đảm bảo mật khẩu đủ mạnh (8+ ký tự, có chữ hoa và số)</li>
+        <li>Kiểm tra kết nối internet của bạn</li>
+        <li>Thử làm mới trang và đăng ký lại</li>
+      </ul>
     </div>
   </div>
 </div>

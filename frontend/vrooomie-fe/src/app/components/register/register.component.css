@@ -105,7 +105,7 @@ h2 {
 
 .form-group select:focus {
   outline: none;
-  border-color: #4caf50;
+  border-color: #999;
 }
 
 .form-group input {
@@ -119,7 +119,7 @@ h2 {
 
 .form-group input:focus {
   outline: none;
-  border-color: #4caf50;
+  border-color: #999;
 }
 
 /* Validation styles */
@@ -147,6 +147,27 @@ h2 {
   cursor: pointer;
   font-size: 16px;
   color: #666;
+}
+
+.input-requirements {
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border-left: 3px solid #4caf50;
+}
+
+.input-requirements small {
+  font-size: 12px;
+  color: #666;
+  line-height: 1.4;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.input-requirements small:before {
+  font-size: 14px;
 }
 
 .terms-checkbox {
@@ -285,6 +306,14 @@ h2 {
     margin-bottom: 16px;
   }
 
+  .password-requirements {
+    padding: 6px 10px;
+  }
+
+  .password-requirements small {
+    font-size: 11px;
+  }
+
   .social-login {
     flex-direction: column;
     gap: 8px;
@@ -303,5 +332,449 @@ h2 {
 
   .register-form {
     margin-top: 20px;
+  }
+}
+
+/* Success Modal Styles */
+.success-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  overflow-y: auto;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.success-content {
+  background: #fff;
+  border-radius: 16px;
+  padding: 40px 32px;
+  width: 100%;
+  max-width: 480px;
+  margin: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  transform: scale(0.9);
+  animation: successZoomIn 0.3s ease-out forwards;
+  text-align: center;
+}
+
+@keyframes successZoomIn {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.success-icon {
+  margin-bottom: 24px;
+}
+
+.success-icon i {
+  font-size: 64px;
+  color: #4caf50;
+  animation: iconBounce 0.6s ease-out 0.2s both;
+}
+
+@keyframes iconBounce {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.success-title {
+  color: #2e7d32;
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0 0 24px 0;
+  letter-spacing: -0.5px;
+}
+
+.success-message {
+  margin-bottom: 32px;
+  text-align: left;
+}
+
+.email-message {
+  font-size: 14px;
+  color: #666;
+  margin: 0 0 8px 0;
+}
+
+.user-email {
+  font-size: 16px;
+  color: #4caf50;
+  font-weight: 600;
+  margin: 0 0 16px 0;
+  padding: 12px 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid #4caf50;
+  word-break: break-all;
+}
+
+.instruction {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.success-actions {
+  margin-bottom: 32px;
+}
+
+.continue-button {
+  background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 16px 32px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+  min-width: 200px;
+}
+
+.continue-button:hover {
+  background: linear-gradient(135deg, #45a049 0%, #388e3c 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(76, 175, 80, 0.4);
+}
+
+.continue-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+}
+
+.email-tips {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: left;
+  border: 1px solid #e9ecef;
+}
+
+.tips-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #495057;
+  margin: 0 0 12px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tips-list {
+  margin: 0;
+  padding-left: 20px;
+  color: #6c757d;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.tips-list li {
+  margin-bottom: 4px;
+}
+
+.tips-list li:last-child {
+  margin-bottom: 0;
+}
+
+/* Responsive design cho success modal */
+@media (max-width: 600px) {
+  .success-content {
+    margin: 16px;
+    padding: 32px 24px;
+    max-width: none;
+  }
+
+  .success-title {
+    font-size: 24px;
+  }
+
+  .success-icon i {
+    font-size: 56px;
+  }
+
+  .user-email {
+    font-size: 14px;
+    padding: 10px 12px;
+  }
+
+  .continue-button {
+    width: 100%;
+    min-width: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .success-content {
+    margin: 12px;
+    padding: 28px 20px;
+  }
+
+  .success-title {
+    font-size: 22px;
+    margin-bottom: 20px;
+  }
+
+  .success-icon {
+    margin-bottom: 20px;
+  }
+
+  .success-icon i {
+    font-size: 48px;
+  }
+
+  .main-message, .user-email {
+    font-size: 14px;
+  }
+
+  .email-message, .instruction {
+    font-size: 13px;
+  }
+
+  .email-tips {
+    padding: 16px;
+  }
+}
+
+/* Error Modal Styles */
+.error-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  overflow-y: auto;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.error-content {
+  background: #fff;
+  border-radius: 16px;
+  padding: 40px 32px;
+  width: 100%;
+  max-width: 480px;
+  margin: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  transform: scale(0.9);
+  animation: errorZoomIn 0.3s ease-out forwards;
+  text-align: center;
+}
+
+@keyframes errorZoomIn {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.error-icon {
+  margin-bottom: 24px;
+}
+
+.error-icon i {
+  font-size: 64px;
+  color: #f44336;
+  animation: errorIconShake 0.6s ease-out 0.2s both;
+}
+
+@keyframes errorIconShake {
+  0% {
+    transform: scale(0) rotate(0deg);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1) rotate(-5deg);
+  }
+  75% {
+    transform: scale(1) rotate(5deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+.error-title {
+  color: #d32f2f;
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0 0 24px 0;
+  letter-spacing: -0.5px;
+}
+
+.error-message {
+  margin-bottom: 32px;
+  text-align: left;
+}
+
+.main-error-message {
+  font-size: 16px;
+  color: #333;
+  margin: 0 0 16px 0;
+  font-weight: 500;
+  padding: 12px 16px;
+  background: #ffebee;
+  border-radius: 8px;
+  border-left: 4px solid #f44336;
+}
+
+.error-instruction {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.error-actions {
+  margin-bottom: 32px;
+}
+
+.retry-button {
+  background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 16px 32px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
+  min-width: 200px;
+}
+
+.retry-button:hover {
+  background: linear-gradient(135deg, #d32f2f 0%, #c62828 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(244, 67, 54, 0.4);
+}
+
+.retry-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(244, 67, 54, 0.3);
+}
+
+.error-help {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: left;
+  border: 1px solid #e9ecef;
+}
+
+.help-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #495057;
+  margin: 0 0 12px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.help-list {
+  margin: 0;
+  padding-left: 20px;
+  color: #6c757d;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.help-list li {
+  margin-bottom: 4px;
+}
+
+.help-list li:last-child {
+  margin-bottom: 0;
+}
+
+/* Responsive design cho error modal */
+@media (max-width: 600px) {
+  .error-content {
+    margin: 16px;
+    padding: 32px 24px;
+    max-width: none;
+  }
+
+  .error-title {
+    font-size: 24px;
+  }
+
+  .error-icon i {
+    font-size: 56px;
+  }
+
+  .main-error-message {
+    font-size: 14px;
+    padding: 10px 12px;
+  }
+
+  .retry-button {
+    width: 100%;
+    min-width: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .error-content {
+    margin: 12px;
+    padding: 28px 20px;
+  }
+
+  .error-title {
+    font-size: 22px;
+    margin-bottom: 20px;
+  }
+
+  .error-icon {
+    margin-bottom: 20px;
+  }
+
+  .error-icon i {
+    font-size: 48px;
+  }
+
+  .main-error-message {
+    font-size: 14px;
+  }
+
+  .error-instruction {
+    font-size: 13px;
+  }
+
+  .error-help {
+    padding: 16px;
   }
 }

@@ -93,7 +93,7 @@ h2 {
 
 .form-group input:focus {
   outline: none;
-  border-color: #4caf50;
+  border-color: #999;
 }
 
 .password-field {
