@@ -37,6 +37,11 @@ public class AuthController {
         return ResponseEntity.ok(iAuthService.login(request));
     }
 
+    @PostMapping("/refresh")
+    public ResponseEntity<RefreshAccessTokenResponse> refreshAccessToken(@RequestBody @Valid RefreshAccessTokenRequest request) {
+        return ResponseEntity.ok(iAuthService.refreshAccessToken(request));
+    }
+
     @GetMapping("/me")
     public UserDto me(@AuthenticationPrincipal User user) {
         return UserMapper.toDTO(user);

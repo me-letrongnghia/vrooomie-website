@@ -1,9 +1,6 @@
 package com.example.rental.services.impl;
 
-import com.example.rental.dto.LoginRequest;
-import com.example.rental.dto.LoginResponse;
-import com.example.rental.dto.UserDto;
-import com.example.rental.dto.RegisterRequest;
+import com.example.rental.dto.*;
 import com.example.rental.entity.User;
 import com.example.rental.mapper.UserMapper;
 import com.example.rental.repository.UserRepository;
@@ -14,6 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.Optional;
 
 @Service
@@ -106,12 +104,36 @@ public class AuthServiceImpl implements IAuthService {
             throw new RuntimeException("Invalid credentials");
         }
 
-        String token = jwtUtil.generateToken(user);
+        String accessToken = jwtUtil.generateAccessToken(user);
+
+        String refreshToken = jwtUtil.generateRefreshToken(user);
 
         String email = user.getEmail();
 
         String fullName = user.getFullName();
 
-        return new LoginResponse(token, email, fullName);
+        return new LoginResponse(accessToken, refreshToken, email, fullName);
+    }
+
+    @Override
+    public RefreshAccessTokenResponse refreshAccessToken(RefreshAccessTokenRequest request) {
+
+        String refreshToken = request.getRefreshToken();
+        if (refreshToken == null || refreshToken.isEmpty()) {
+            throw new RuntimeException(refreshToken + "Refresh token is required");
+        }
+
+        String email = jwtUtil.extractEmail(refreshToken);
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Invalid credentials"));
+
+        if (!jwtUtil.isTokenValid(refreshToken, user)) {
+            throw new RuntimeException("Invalid refresh token or token has expired");
+        }
+
+        String newAccessToken = jwtUtil.generateAccessToken(user);
+
+        return new RefreshAccessTokenResponse(newAccessToken);
     }
 }
