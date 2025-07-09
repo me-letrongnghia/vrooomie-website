@@ -15,6 +15,8 @@ export class LoginComponent implements OnInit, OnDestroy {
   @Output() switchToRegister = new EventEmitter<void>();
 
   loginForm: FormGroup = new FormGroup<any>({});
+  showErrorModal: boolean = false;
+  errorMessage: string = '';
 
   constructor(private authService: AuthService,
     private formBuilder: FormBuilder,
@@ -39,34 +41,43 @@ export class LoginComponent implements OnInit, OnDestroy {
     // console.log('Submit form: ', this.loginForm.value);
     this.authService.login(this.loginForm.value).subscribe(
       (response) => {
-        console.log('Login successful: ', response);
+
+        // Close login modal
         this.onClose();
 
-        // Store token and email in local storage
-        if (response.token && response.email) {
-          const token = response.token;
-          const email = response.email;
-          localStorage.setItem('token', token);
-          localStorage.setItem('email', email);
-
-          // Navigate
-          const redirectUrl = localStorage.getItem('redirectUrl') || '/';
-
-          // Back to previous page
-          this.router.navigate([redirectUrl]);
-
-          // Remove redirect URL from local storage
-          localStorage.removeItem('redirectUrl');
-        }
+        // Navigate to redirect URL or home
+        const redirectUrl = localStorage.getItem('redirectUrl') || '/';
+        this.router.navigate([redirectUrl]);
+        localStorage.removeItem('redirectUrl');
       }, (error) => {
         console.log('Login failed: ', error);
-        if (error) {
-          alert('Login failed!');
-        }
+        this.errorMessage = this.getErrorMessage(error);
+        this.showErrorModal = true;
       }
     );
   }
 
+  // Get user-friendly error message
+  getErrorMessage(error: any): string {
+    if (error.error && error.error.message) {
+      return error.error.message;
+    } else if (error.status === 403) {
+      return 'Sai email hoặc mật khẩu. Vui lòng thử lại.';
+    } else if (error.status === 500) {
+      return 'Lỗi máy chủ. Vui lòng thử lại sau.';
+    } else if (error.status === 0) {
+      return 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối internet.';
+    } else {
+      return 'Đăng nhập thất bại. Vui lòng thử lại.';
+    }
+  }
+
+  // Close error modal
+  closeErrorModal() {
+    this.showErrorModal = false;
+  }
+
+  // Re-enable body scroll when modal closes
   ngOnDestroy() {
     // Re-enable body scroll when modal closes
     document.body.style.overflow = 'auto';

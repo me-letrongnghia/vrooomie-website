@@ -15,6 +15,7 @@ import { LoginComponent } from './components/login/login.component';
 import { RegisterComponent } from './components/register/register.component';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
+import { UserDetailInfoComponent } from './components/user-detail-info/user-detail-info.component';
 
 @NgModule({
   declarations: [
@@ -28,7 +29,8 @@ import { HttpClientModule } from '@angular/common/http';
     HomeComponent,
     BecomeCarOwnerComponent,
     LoginComponent,
-    RegisterComponent
+    RegisterComponent,
+    UserDetailInfoComponent
   ],
   imports: [
     BrowserModule,

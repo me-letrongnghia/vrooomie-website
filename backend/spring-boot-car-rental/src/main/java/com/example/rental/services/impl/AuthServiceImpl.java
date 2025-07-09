@@ -41,7 +41,7 @@ public class AuthServiceImpl implements IAuthService {
                 existingUser.setRole(User.Role.valueOf(request.getRole().toUpperCase()));
                 existingUser.setVerificationCode(emailServiceImpl.generateOtpCode());
                 existingUser.setOtpGeneratedAt(LocalDateTime.now());
-                existingUser.setOtpExpiry(LocalDateTime.now().plusMinutes(1));
+                existingUser.setOtpExpiry(LocalDateTime.now().plusMinutes(30)); // Thay đổi thời gian hết hạn nếu cần
                 userRepository.save(existingUser);
 
                 emailServiceImpl.sendVerificationEmail(existingUser.getEmail(), existingUser.getVerificationCode());
@@ -62,7 +62,7 @@ public class AuthServiceImpl implements IAuthService {
                 .enabled(false)
                 .verificationCode(code)
                 .otpGeneratedAt(LocalDateTime.now())
-                .otpExpiry(LocalDateTime.now().plusMinutes(1))
+                .otpExpiry(LocalDateTime.now().plusMinutes(30)) // Thay đổi thời gian hết hạn nếu cần
                 .build();
 
         User savedUser = userRepository.save(user);
@@ -110,6 +110,8 @@ public class AuthServiceImpl implements IAuthService {
 
         String email = user.getEmail();
 
-        return new LoginResponse(token, email);
+        String fullName = user.getFullName();
+
+        return new LoginResponse(token, email, fullName);
     }
 }

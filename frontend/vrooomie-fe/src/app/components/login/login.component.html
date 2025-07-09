@@ -39,3 +39,24 @@
     </div>
   </div>
 </div>
+
+<!-- Error Modal -->
+<div class="error-modal" *ngIf="showErrorModal" (click)="closeErrorModal()">
+  <div class="error-content" (click)="$event.stopPropagation()">
+    <div class="error-icon">
+      <i class="fa-solid fa-circle-xmark"></i>
+    </div>
+    
+    <h2 class="error-title">Đăng nhập thất bại!</h2>
+    
+    <div class="error-message">
+      <p class="main-error-message">{{ errorMessage }}</p>
+    </div>
+    
+    <div class="error-actions">
+      <button class="retry-button" (click)="closeErrorModal()">
+        Thử lại
+      </button>
+    </div>
+  </div>
+</div>
