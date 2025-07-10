@@ -29,6 +29,9 @@
   </div>
 </header>
 
+<!-- Loader -->
+<app-loader [isLoading]="(loadingService.loading$ | async) ?? false"></app-loader>
+
 <!-- Router-outlet -->
 <router-outlet></router-outlet>
 

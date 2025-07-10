@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from './services/auth.service';
+import { LoadingService } from './services/loading.service';
 
 @Component({
   selector: 'app-root',
@@ -15,7 +16,7 @@ export class AppComponent implements OnInit{
   isAuthenticated = false;
   currentUser: any = null;
 
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService, public loadingService: LoadingService) {}
 
   ngOnInit() {
     // Subscribe to authentication state

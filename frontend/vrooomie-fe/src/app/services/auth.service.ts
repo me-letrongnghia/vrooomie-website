@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { BehaviorSubject, finalize, Observable, tap } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { jwtDecode } from 'jwt-decode';
+import { LoadingService } from './loading.service';
 
 @Injectable({
   providedIn: 'root'
@@ -21,7 +22,7 @@ export class AuthService {
   private currentUserSubject = new BehaviorSubject<any>(null);
   currentUser$ = this.currentUserSubject.asObservable();
 
-  constructor(private httpClient: HttpClient, private router: Router) {
+  constructor(private loadingService: LoadingService,private httpClient: HttpClient, private router: Router) {
     // Check if user is already logged in on app startup
     this.checkExistingLogin();
   }
@@ -45,22 +46,44 @@ export class AuthService {
 
   // Check existing login on app startup
   private checkExistingLogin() {
-    
+
     // Only run in browser environment
     if (this.isBrowser()) {
       try {
         const user = localStorage.getItem('currentUser');
-        const token = localStorage.getItem('token');
+        const accessToken = localStorage.getItem('accessToken');
+        const refreshToken = localStorage.getItem('refreshToken');
 
-        // Check if token is expired
-        if (this.isTokenExpired(token || '')) {
-          this.clearAuthState();
-          return;
+        // Check if access token is expired
+        if (this.isTokenExpired(accessToken || '')) {
+          // If refresh token is also expired, clear auth state
+          if (this.isTokenExpired(refreshToken || '')) {
+            this.clearAuthState();
+            return;
+          }
+
+          // Refresh access token using refresh token
+          this.refreshAccessToken(refreshToken).subscribe({
+            next: (response: any) => {
+              // Save new access token to localStorage (expecting backend returns accessToken)
+              localStorage.setItem('accessToken', response.accessToken || 'dummy-token');
+              // If backend returns user info, update user state
+              if (response) {
+                localStorage.setItem('currentUser', JSON.stringify(response));
+                this.currentUserSubject.next(response);
+              }
+              this.isAuthenticatedSubject.next(true);
+            },
+            error: (error: any) => {
+              console.error('Error refreshing access token:', error); // Debug log
+              this.clearAuthState();
+            }
+          });
         }
-        
-        console.log('Checking existing login:', { user, token }); // Debug log
 
-        if (user && token) {
+        console.log('Checking existing login:', { user, accessToken, refreshToken }); // Debug log
+
+        if (user && accessToken && refreshToken) {
           const parsedUser = JSON.parse(user);
           console.log('Restoring user session:', parsedUser); // Debug log
           this.currentUserSubject.next(parsedUser);
@@ -75,11 +98,18 @@ export class AuthService {
     }
   }
 
+  // Refresh access token method
+  refreshAccessToken(refreshToken: string | null): Observable<any> {
+    // Always send as object { refreshToken }
+    return this.httpClient.post(`${this.authUrl}/refresh`, { refreshToken });
+  }
+
   // Clear authentication state
   private clearAuthState() {
     if (this.isBrowser()) {
       localStorage.removeItem('currentUser');
-      localStorage.removeItem('token');
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
     }
     this.currentUserSubject.next(null);
     this.isAuthenticatedSubject.next(false);
@@ -87,6 +117,10 @@ export class AuthService {
 
   // Login method
   login(loginRequest: any): Observable<any> {
+    // Show loader
+    this.loadingService.show();
+
+    // Send login request
     return this.httpClient.post(`${this.authUrl}/login`, loginRequest)
       .pipe(
         tap((response: any) => {
@@ -99,20 +133,38 @@ export class AuthService {
             // Save user info and token to localStorage (only in browser)
             if (this.isBrowser()) {
               localStorage.setItem('currentUser', JSON.stringify(response));
-              localStorage.setItem('token', response.token || 'dummy-token');
+              localStorage.setItem('accessToken', response.accessToken || 'dummy-token');
+              localStorage.setItem('refreshToken', response.refreshToken || 'dummy-token');
             }
 
             // Update subjects
             this.currentUserSubject.next(response);
             this.isAuthenticatedSubject.next(true);
           }
+        }),
+
+        // Hide loader
+        finalize(() => {
+          this.loadingService.hide();
         })
       );
   }
 
   // Register method
   register(registerRequest: any): Observable<any> {
-    return this.httpClient.post(`${this.authUrl}/register`, registerRequest);
+
+    // Show loader
+    this.loadingService.show();
+
+    // Send register request
+    return this.httpClient.post(`${this.authUrl}/register`, registerRequest)
+      .pipe(
+
+        // Hide loader
+        finalize(() => {
+          this.loadingService.hide();
+        })
+      );
   }
 
   // Logout method

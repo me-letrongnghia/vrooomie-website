@@ -16,6 +16,7 @@ import { RegisterComponent } from './components/register/register.component';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
 import { UserDetailInfoComponent } from './components/user-detail-info/user-detail-info.component';
+import { LoaderComponent } from './shared/loader/loader.component';
 
 @NgModule({
   declarations: [
@@ -30,7 +31,8 @@ import { UserDetailInfoComponent } from './components/user-detail-info/user-deta
     BecomeCarOwnerComponent,
     LoginComponent,
     RegisterComponent,
-    UserDetailInfoComponent
+    UserDetailInfoComponent,
+    LoaderComponent
   ],
   imports: [
     BrowserModule,

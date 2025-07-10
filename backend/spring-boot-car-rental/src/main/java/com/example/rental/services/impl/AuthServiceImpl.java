@@ -134,6 +134,10 @@ public class AuthServiceImpl implements IAuthService {
 
         String newAccessToken = jwtUtil.generateAccessToken(user);
 
-        return new RefreshAccessTokenResponse(newAccessToken);
+        System.out.println("New access token generated: " + newAccessToken); // Debug log
+
+        String fullName = user.getFullName();
+
+        return new RefreshAccessTokenResponse(newAccessToken, refreshToken, email, fullName);
     }
 }

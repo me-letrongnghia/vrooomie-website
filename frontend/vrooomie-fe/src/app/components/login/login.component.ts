@@ -39,8 +39,8 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   submitForm() {
     // console.log('Submit form: ', this.loginForm.value);
-    this.authService.login(this.loginForm.value).subscribe(
-      (response) => {
+    this.authService.login(this.loginForm.value).subscribe({
+      next: (response: any) => {
 
         // Close login modal
         this.onClose();
@@ -49,12 +49,13 @@ export class LoginComponent implements OnInit, OnDestroy {
         const redirectUrl = localStorage.getItem('redirectUrl') || '/';
         this.router.navigate([redirectUrl]);
         localStorage.removeItem('redirectUrl');
-      }, (error) => {
+      }, 
+      error: (error: any) => {
         console.log('Login failed: ', error);
         this.errorMessage = this.getErrorMessage(error);
         this.showErrorModal = true;
       }
-    );
+    });
   }
 
   // Get user-friendly error message

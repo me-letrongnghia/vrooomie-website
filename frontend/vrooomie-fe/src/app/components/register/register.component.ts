@@ -96,17 +96,18 @@ export class RegisterComponent implements OnInit, OnDestroy {
     }
     
     // console.log('Submit form: ', formData);
-    this.authService.register(formData).subscribe(
-      (response) => {
+    this.authService.register(formData).subscribe({
+      next: (response: any) => {
         console.log('Register successful: ', response)
         this.userEmail = formData.email;
         this.showSuccessModal = true;
-      }, (error) => {
+      }, 
+      error: (error: any) => {
         console.log('Register failed: ', error);
         this.errorMessage = this.getErrorMessage(error);
         this.showErrorModal = true;
       }
-    )
+    });
   }
 
   // Get user-friendly error message
