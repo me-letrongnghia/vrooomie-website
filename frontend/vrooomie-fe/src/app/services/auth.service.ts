@@ -18,11 +18,15 @@ export class AuthService {
   private isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
   isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
 
+  // Observable for authentication loading state
+  private authLoadingSubject = new BehaviorSubject<boolean>(true);
+  authLoading$ = this.authLoadingSubject.asObservable();
+
   // Observable for current user
   private currentUserSubject = new BehaviorSubject<any>(null);
   currentUser$ = this.currentUserSubject.asObservable();
 
-  constructor(private loadingService: LoadingService,private httpClient: HttpClient, private router: Router) {
+  constructor(private loadingService: LoadingService, private httpClient: HttpClient, private router: Router) {
     // Check if user is already logged in on app startup
     this.checkExistingLogin();
   }
@@ -46,6 +50,8 @@ export class AuthService {
 
   // Check existing login on app startup
   private checkExistingLogin() {
+    // Set loading to true
+    this.authLoadingSubject.next(true);
 
     // Only run in browser environment
     if (this.isBrowser()) {
@@ -73,12 +79,14 @@ export class AuthService {
                 this.currentUserSubject.next(response);
               }
               this.isAuthenticatedSubject.next(true);
+              this.authLoadingSubject.next(false); // Complete loading
             },
             error: (error: any) => {
               console.error('Error refreshing access token:', error); // Debug log
               this.clearAuthState();
             }
           });
+          return; // Exit early since we're handling async refresh
         }
 
         console.log('Checking existing login:', { user, accessToken, refreshToken }); // Debug log
@@ -90,12 +98,18 @@ export class AuthService {
           this.isAuthenticatedSubject.next(true);
         } else {
           console.log('No existing session found'); // Debug log
+          // Explicitly set to false if no session found
+          this.isAuthenticatedSubject.next(false);
+          this.currentUserSubject.next(null);
         }
       } catch (error) {
         console.error('Error initializing auth state:', error);
         this.clearAuthState();
       }
-    }
+
+      // Complete loading
+      this.authLoadingSubject.next(false); 
+    };
   }
 
   // Refresh access token method
@@ -113,6 +127,7 @@ export class AuthService {
     }
     this.currentUserSubject.next(null);
     this.isAuthenticatedSubject.next(false);
+    this.authLoadingSubject.next(false); // Complete loading
   }
 
   // Login method
@@ -181,5 +196,10 @@ export class AuthService {
   // Check if user is authenticated
   isAuthenticated(): boolean {
     return this.isAuthenticatedSubject.value;
+  }
+
+  // Check if auth is loading
+  isAuthLoading(): boolean {
+    return this.authLoadingSubject.value;
   }
 }

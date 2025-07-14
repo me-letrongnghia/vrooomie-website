@@ -18,7 +18,7 @@ public class JwtUtil {
     private String secretKey;
 
     private final long EXPIRATION_TIME_ACCESS_TOKEN = 1000 * 60; // 1 minute
-    private final long EXPIRATION_TIME_REFRESH_TOKEN = 1000 * 60 * 60 * 24 * 20; // 30 days
+    private final long EXPIRATION_TIME_REFRESH_TOKEN = 1000 * 60 * 60 * 24; // 1 day
 
     public String generateAccessToken(User user) {
         return Jwts.builder()

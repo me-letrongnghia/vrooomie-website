@@ -14,11 +14,21 @@ export class AppComponent implements OnInit{
   isLoginVisible = false;
   isRegisterVisible = false;
   isAuthenticated = false;
+  isAuthLoading = true;
   currentUser: any = null;
 
-  constructor(private authService: AuthService, public loadingService: LoadingService) {}
+  constructor(private authService: AuthService, public loadingService: LoadingService) {
+    this.isAuthLoading = this.authService.isAuthLoading();
+    this.isAuthenticated = this.authService.isAuthenticated();
+  }
 
   ngOnInit() {
+    // Subscribe to authentication loading state
+    this.authService.authLoading$.subscribe(isLoading => {
+      console.log('Auth loading state changed:', isLoading); // Debug log
+      this.isAuthLoading = isLoading;
+    });
+
     // Subscribe to authentication state
     this.authService.isAuthenticated$.subscribe(isAuth => {
       console.log('Authentication state changed:', isAuth); // Debug log

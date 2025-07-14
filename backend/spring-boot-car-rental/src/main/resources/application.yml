@@ -1,0 +1,35 @@
+spring:
+  application:
+    name: rental
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/car_rental
+    username: root
+    password: 230104
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    show-sql: true
+    # hibernate:
+    #   ddl-auto: update
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: nghialee2301@gmail.com
+    password: nyumkhkmumelmznc
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+  cache:
+    type: redis
+  redis:
+    host: 127.0.0.1
+    port: 6379
+
+jwt:
+  secret: 97f273a697f47675f92c834c6505eeebae0364694fe8879c59ac2d7775b5fb1e2adbe81dfff9f5aa05fd7dcb18f5834f63e48871a4c2a93cd68b875588e70e68
