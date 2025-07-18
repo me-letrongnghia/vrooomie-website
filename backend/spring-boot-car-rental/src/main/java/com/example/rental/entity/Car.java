@@ -43,6 +43,9 @@ public class Car {
 
     private String imageUrl;
 
+    @Column(nullable = false)
+    private String address;
+
     @Column(length = 2000)
     private String description;
 
@@ -57,4 +60,3 @@ public class Car {
         INACTIVE
     }
 }
-

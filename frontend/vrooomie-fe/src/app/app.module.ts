@@ -17,6 +17,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
 import { UserDetailInfoComponent } from './components/user-detail-info/user-detail-info.component';
 import { LoaderComponent } from './shared/loader/loader.component';
+import { CarDetailComponent } from './components/car-detail/car-detail.component';
 
 @NgModule({
   declarations: [
@@ -32,7 +33,8 @@ import { LoaderComponent } from './shared/loader/loader.component';
     LoginComponent,
     RegisterComponent,
     UserDetailInfoComponent,
-    LoaderComponent
+    LoaderComponent,
+    CarDetailComponent
   ],
   imports: [
     BrowserModule,

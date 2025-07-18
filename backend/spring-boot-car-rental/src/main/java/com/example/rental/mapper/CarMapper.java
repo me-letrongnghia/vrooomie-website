@@ -18,6 +18,7 @@ public class CarMapper {
                 .pricePerDay(car.getPricePerDay())
                 .status(car.getStatus().name())
                 .imageUrl(car.getImageUrl())
+                .address(car.getAddress())
                 .description(car.getDescription())
                 .build();
     }
@@ -32,6 +33,7 @@ public class CarMapper {
                 .pricePerDay(req.getPricePerDay())
                 .status(Car.CarStatus.AVAILABLE)
                 .imageUrl(req.getImageUrl())
+                .address(req.getAddress())
                 .description(req.getDescription())
                 .build();
     }

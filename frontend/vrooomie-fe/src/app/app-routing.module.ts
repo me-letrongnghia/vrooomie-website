@@ -7,6 +7,7 @@ import { BecomeCarOwnerComponent } from './components/become-car-owner/become-ca
 import { LoginComponent } from './components/login/login.component';
 import { RegisterComponent } from './components/register/register.component';
 import { UserDetailInfoComponent } from './components/user-detail-info/user-detail-info.component';
+import { CarDetailComponent } from './components/car-detail/car-detail.component';
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -15,7 +16,8 @@ const routes: Routes = [
   { path: 'my-trips', component: MyTripComponent },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
-  { path: 'user-profile', component: UserDetailInfoComponent }
+  { path: 'user-profile', component: UserDetailInfoComponent },
+  { path: 'car/:id', component: CarDetailComponent }
 ];
 
 @NgModule({

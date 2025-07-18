@@ -23,11 +23,15 @@
     border-radius: 18px;
     box-shadow: 0 2px 16px rgba(0, 0, 0, 0.07);
     overflow: hidden;
-    width: 370px;
+    width: 338px;
     margin-bottom: 24px;
     transition: box-shadow 0.2s;
     display: flex;
     flex-direction: column;
+}
+
+.car-card a {
+    text-decoration: none;
 }
 
 .car-card:hover {
@@ -43,6 +47,9 @@
 }
 
 .car-image-wrapper img {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -94,6 +101,7 @@
     font-weight: 500;
     background: #f5f5f5;
     color: #4caf50;
+    border: 1px solid #4caf50;
 }
 
 .tag.orange {
@@ -102,6 +110,7 @@
 }
 
 .car-info h3 {
+    color: #333;
     font-size: 1.15rem;
     font-weight: bold;
     margin: 0 0 4px 0;
@@ -152,8 +161,88 @@
     font-size: 1.2rem;
 }
 
+.per-day {
+    color: #888;
+    font-size: 1rem;
+}
+
 .car-hourly {
     color: #2196f3;
     font-size: 1rem;
     margin-top: 2px;
+}
+
+/* Loading, Error, and No Cars States */
+.loading-state {
+    padding: 60px 20px;
+    text-align: center;
+}
+
+.loading-state p {
+    font-size: 1.2rem;
+    color: #666;
+    margin: 0;
+}
+
+.error-state {
+    padding: 60px 20px;
+    text-align: center;
+}
+
+.error-state p {
+    font-size: 1.1rem;
+    color: #f44336;
+    margin: 0 0 20px 0;
+}
+
+.retry-button {
+    background: #4caf50;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.retry-button:hover {
+    background: #45a049;
+}
+
+.no-cars {
+    padding: 60px 20px;
+    text-align: center;
+    grid-column: 1 / -1;
+}
+
+.no-cars p {
+    font-size: 1.2rem;
+    color: #666;
+    margin: 0;
+}
+
+/* Additional status tag styles */
+.tag.red {
+    background: #ffebee;
+    color: #f44336;
+}
+
+.tag.yellow {
+    background: #fff8e1;
+    color: #ff9800;
+}
+
+.tag.green {
+    background: #e8f5e8;
+    color: #4caf50;
+}
+
+.car-description {
+    color: #666;
+    font-size: 0.95rem;
+    margin-bottom: 4px;
+    max-height: 40px;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }

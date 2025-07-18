@@ -16,5 +16,6 @@ public class CarRequest {
     @NotNull
     private BigDecimal pricePerDay;
     private String imageUrl;
+    private String address;
     private String description;
 }

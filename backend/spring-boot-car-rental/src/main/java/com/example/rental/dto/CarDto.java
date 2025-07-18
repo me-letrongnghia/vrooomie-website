@@ -23,5 +23,6 @@ public class CarDto implements Serializable {
     private BigDecimal pricePerDay;
     private String status;
     private String imageUrl;
+    private String address;
     private String description;
 }
