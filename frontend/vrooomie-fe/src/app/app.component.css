@@ -46,19 +46,6 @@
   margin-right: 20px;
 }
 
-.vrooomie-header .user-avatar {
-  background: #ffb300;
-  color: #fff;
-  border-radius: 50%;
-  padding: 8px 12px;
-  font-weight: bold;
-  margin-right: 8px;
-}
-
-.vrooomie-header .user-name {
-  font-weight: 500;
-}
-
 .vrooomie-header .dropdown {
   font-size: 1rem;
   margin-left: 4px;
@@ -121,10 +108,11 @@
 .user-profile .user-avatar {
   width: 10px;
   height: 15px;
-  border-radius: 50%;
   overflow: hidden;
-  margin-right: 8px;
-  background: #ffb300;
+  color: #000000;
+  padding: 8px 12px;
+  margin-right: 6px;
+  font-size: 1.2rem;
   display: flex;
   align-items: center;
   justify-content: center;
