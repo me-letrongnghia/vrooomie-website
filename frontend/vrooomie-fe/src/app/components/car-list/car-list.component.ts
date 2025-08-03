@@ -39,4 +39,22 @@ export class CarListComponent implements OnInit {
   formatPrice(price: number): string {
     return price.toLocaleString('vi-VN');
   }
+
+  getStatusText(status: string): string {
+    switch (status) {
+      case 'AVAILABLE': return 'Có sẵn';
+      case 'BOOKED': return 'Đã thuê';
+      case 'UNAVAILABLE': return 'Bảo trì';
+      default: return status;
+    }
+  }
+
+  getStatusClass(status: string): string {
+    switch (status) {
+      case 'AVAILABLE': return 'status-available';
+      case 'BOOKED': return 'status-rented';
+      case 'UNAVAILABLE': return 'status-maintenance';
+      default: return 'status-unknown';
+    }
+  }
 }

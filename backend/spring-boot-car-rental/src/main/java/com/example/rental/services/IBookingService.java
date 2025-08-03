@@ -13,4 +13,5 @@ public interface IBookingService {
     List<BookingDto> getBookingsByRenter(User renter);
     List<BookingDto> getBookingsForOwnedCars(User owner);
     List<BookingDto> getBookingsForOwnedCarsByStatus(User owner, String status);
+    List<BookingDto> getBookingsForCar(Long carId);
 }

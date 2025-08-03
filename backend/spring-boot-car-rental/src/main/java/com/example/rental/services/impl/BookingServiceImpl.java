@@ -8,7 +8,6 @@ import com.example.rental.entity.User;
 import com.example.rental.mapper.BookingMapper;
 import com.example.rental.repository.BookingRepository;
 import com.example.rental.repository.CarRepository;
-import com.example.rental.repository.UserRepository;
 import com.example.rental.services.IBookingService;
 import com.example.rental.services.IEmailService;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +25,6 @@ public class BookingServiceImpl implements IBookingService {
 
     private final BookingRepository bookingRepository;
     private final CarRepository carRepository;
-    private final UserRepository userRepository;
     private final IEmailService iEmailService;
 
     @Override
@@ -160,6 +158,14 @@ public class BookingServiceImpl implements IBookingService {
             bookings = bookingRepository.findByCarOwnerAndStatus(owner, bookingStatus);
         }
 
+        return bookings.stream()
+                .map(BookingMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<BookingDto> getBookingsForCar(Long carId) {
+        List<Booking> bookings = bookingRepository.findByCarId(carId);
         return bookings.stream()
                 .map(BookingMapper::toDto)
                 .collect(Collectors.toList());

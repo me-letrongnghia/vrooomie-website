@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
-import { BehaviorSubject, finalize, Observable, tap } from 'rxjs';
-import { HttpClient } from '@angular/common/http';
+import { BehaviorSubject, finalize, Observable, switchMap, tap } from 'rxjs';
+import { HttpClient, HttpBackend } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { jwtDecode } from 'jwt-decode';
 import { LoadingService } from './loading.service';
@@ -26,8 +26,15 @@ export class AuthService {
   private currentUserSubject = new BehaviorSubject<any>(null);
   currentUser$ = this.currentUserSubject.asObservable();
 
-  constructor(private loadingService: LoadingService, private httpClient: HttpClient, private router: Router) {
-    // Check if user is already logged in on app startup
+  private httpNoInterceptor: HttpClient;
+
+  constructor(
+    private loadingService: LoadingService,
+    private httpClient: HttpClient,
+    private router: Router,
+    private httpBackend: HttpBackend // Thêm dòng này
+  ) {
+    this.httpNoInterceptor = new HttpClient(httpBackend); // Tạo instance không qua interceptor
     this.checkExistingLogin();
   }
 
@@ -108,18 +115,18 @@ export class AuthService {
       }
 
       // Complete loading
-      this.authLoadingSubject.next(false); 
+      this.authLoadingSubject.next(false);
     };
   }
 
   // Refresh access token method
   refreshAccessToken(refreshToken: string | null): Observable<any> {
-    // Always send as object { refreshToken }
-    return this.httpClient.post(`${this.authUrl}/refresh`, { refreshToken });
+    // Dùng httpNoInterceptor để tránh vòng lặp
+    return this.httpNoInterceptor.post(`${this.authUrl}/refresh`, { refreshToken });
   }
 
   // Clear authentication state
-  private clearAuthState() {
+  clearAuthState() {
     if (this.isBrowser()) {
       localStorage.removeItem('currentUser');
       localStorage.removeItem('accessToken');
@@ -186,6 +193,29 @@ export class AuthService {
   logout() {
     console.log('Logging out user'); // Debug log
     this.clearAuthState();
+  }
+
+  // Get access token
+  getAccessToken(): string | null {
+    if (this.isBrowser()) {
+      return localStorage.getItem('accessToken');
+    }
+    return null;
+  }
+
+  // Get refresh token
+  getRefreshToken(): string | null {
+    if (this.isBrowser()) {
+      return localStorage.getItem('refreshToken');
+    }
+    return null;
+  }
+
+  // Save access token
+  saveAccessToken(token: string): void {
+    if (this.isBrowser()) {
+      localStorage.setItem('accessToken', token);
+    }
   }
 
   // Get current user

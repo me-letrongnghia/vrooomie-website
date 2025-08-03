@@ -1,1 +1,336 @@
-<p>car-detail works!</p>
+<div class="car-detail-page">
+    <!-- Loading State -->
+    <div class="loader-overlay" *ngIf="loading">
+        <div class="dots-loader">
+            <span></span><span></span><span></span>
+        </div>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="error && !loading" class="error-container">
+        <i class="fa-solid fa-exclamation-triangle"></i>
+        <p>{{ error }}</p>
+        <button (click)="loadCarDetails()" class="retry-btn">Thử lại</button>
+        <button (click)="goBack()" class="back-btn">Quay lại</button>
+    </div>
+
+    <!-- Main Content -->
+    <div *ngIf="car && !loading && !error" class="car-detail-container">
+
+        <!-- Car Image Gallery -->
+        <div class="car-image-gallery">
+            <div class="main-image">
+                <img [src]="car.imageUrl" [alt]="car.brand + ' ' + car.model" />
+                <div class="image-overlay">
+                    <span class="status-indicator" [ngClass]="getStatusClass(car.status)">
+                        {{ getStatusText(car.status) }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="thumbnail-gallery">
+                <div class="thumbnail-item">
+                    <img [src]="car.imageUrl" [alt]="car.brand + ' ' + car.model" />
+                </div>
+                <div class="thumbnail-item">
+                    <img [src]="car.imageUrl" [alt]="car.brand + ' ' + car.model" />
+                </div>
+            </div>
+        </div>
+
+        <!-- Car Information -->
+        <div class="car-info-section">
+            <!-- Car Header -->
+            <div class="car-header">
+                <div class="title-actions">
+                    <h1 class="car-name">{{ car.brand?.toUpperCase() }} {{ car.model?.toUpperCase() }} 2024</h1>
+                    <div class="action-buttons">
+                        <button class="action-btn">
+                            <i class="fa-solid fa-share-alt"></i>
+                        </button>
+                        <button class="action-btn">
+                            <i class="fa-regular fa-heart"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="rating-info">
+                    <div class="rating-section">
+                        <span class="rating-star"><i class="fa-solid fa-star"></i></span>
+                        <span class="rating-value">{{ getAverageRating() }}</span>
+                        <span class="separator">•</span>
+                        <span class="trip-count"><i class="fa-solid fa-chart-simple"></i> {{ reviews.length * 10 }}+
+                            chuyến</span>
+                        <span class="separator">•</span>
+                        <span class="location">{{ car.address }}</span>
+                    </div>
+                </div>
+
+                <!-- Feature Tags -->
+                <div class="feature-tags">
+                    <span class="tag transmission">Số tự động</span>
+                    <span class="tag delivery">Giao xe tận nơi</span>
+                    <span class="tag instant">Đặt xe nhanh</span>
+                    <span class="tag no-deposit">Miễn thế chấp</span>
+                    <span class="tag hourly">Thuê giờ</span>
+                </div>
+            </div>
+
+            <!-- Car Specifications -->
+            <div class="specifications-section">
+                <h3 class="section-title">Đặc điểm</h3>
+                <div class="specs-grid">
+                    <div class="spec-item">
+                        <div class="spec-icon transmission">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path
+                                    d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4M12,6A6,6 0 0,1 18,12A6,6 0 0,1 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6M12,8A4,4 0 0,0 8,12A4,4 0 0,0 12,16A4,4 0 0,0 16,12A4,4 0 0,0 12,8Z" />
+                            </svg>
+                        </div>
+                        <div class="spec-content">
+                            <span class="spec-label">Truyền động</span>
+                            <span class="spec-value">Số tự động</span>
+                        </div>
+                    </div>
+
+                    <div class="spec-item">
+                        <div class="spec-icon seats">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path
+                                    d="M4,6V12H6V10H10V12H12V6H4M14,6V12H16V10H20V12H22V6H14M4,14V20H6V18H10V20H12V14H4M14,14V20H16V18H20V20H22V14H14Z" />
+                            </svg>
+                        </div>
+                        <div class="spec-content">
+                            <span class="spec-label">Số ghế</span>
+                            <span class="spec-value">5 chỗ</span>
+                        </div>
+                    </div>
+
+                    <div class="spec-item">
+                        <div class="spec-icon fuel">
+                            <i class="fa-solid fa-gas-pump"></i>
+                        </div>
+                        <div class="spec-content">
+                            <span class="spec-label">Nhiên liệu</span>
+                            <span class="spec-value">Xăng</span>
+                        </div>
+                    </div>
+
+                    <div class="spec-item">
+                        <div class="spec-icon consumption">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path
+                                    d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4Z" />
+                            </svg>
+                        </div>
+                        <div class="spec-content">
+                            <span class="spec-label">Tiêu hao</span>
+                            <span class="spec-value">6.5L/100km</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Description -->
+            <div class="description-section" *ngIf="car.description">
+                <h3 class="section-title">Mô tả</h3>
+                <p class="description-text">{{ car.description }}</p>
+            </div>
+
+            <!-- Amenities -->
+            <div class="amenities-section">
+                <h3 class="section-title">Các tiện nghi khác</h3>
+                <div class="amenities-grid">
+                    <div class="amenity-item">
+                        <div class="amenity-icon">
+                            <i class="fa-solid fa-map"></i>
+                        </div>
+                        <span>Bản đồ</span>
+                    </div>
+
+                    <div class="amenity-item">
+                        <div class="amenity-icon">
+                            <i class="fa-brands fa-bluetooth-b"></i>
+                        </div>
+                        <span>Bluetooth</span>
+                    </div>
+
+                    <div class="amenity-item">
+                        <div class="amenity-icon">
+                            <i class="fa-solid fa-o"></i>
+                        </div>
+                        <span>Camera hành trình</span>
+                    </div>
+
+                    <div class="amenity-item">
+                        <div class="amenity-icon">
+                            <i class="fa-solid fa-camera"></i>
+                        </div>
+                        <span>Camera lùi</span>
+                    </div>
+
+                    <div class="amenity-item">
+                        <div class="amenity-icon">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                        </div>
+                        <span>Cảnh báo tốc độ</span>
+                    </div>
+
+                    <div class="amenity-item">
+                        <div class="amenity-icon">
+                            <i class="fa-solid fa-location-crosshairs"></i>
+                        </div>
+                        <span>Định vị GPS</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Date Selection -->
+            <div class="booking-section">
+                <h3 class="section-title">Chọn thời gian thuê xe</h3>
+                
+                <!-- Existing bookings info -->
+                <div *ngIf="existingBookings.length > 0" class="booking-info">
+                    <div class="booking-info-header">
+                        <i class="fa-solid fa-calendar-times"></i>
+                        <span>Lịch trình không khả dụng ({{ existingBookings.length }} booking):</span>
+                    </div>
+                    <div class="booking-note">
+                        <i class="fa-solid fa-info-circle"></i>
+                        <span>Lưu ý: Cần để trống ít nhất 1 ngày giữa các lần đặt xe</span>
+                    </div>
+                    <div class="booked-dates">
+                        <div *ngFor="let booking of existingBookings" 
+                             class="booked-period"
+                             [ngClass]="{
+                               'booking-active': isBookingActive(booking),
+                               'booking-upcoming': isBookingUpcoming(booking),
+                               'booking-pending': booking.status === 'PENDING'
+                             }">
+                            <div class="booking-dates">
+                                {{ formatBookingPeriod(booking) }}
+                            </div>
+                            <div class="booking-status">
+                                <i class="fa-solid" 
+                                   [ngClass]="{
+                                     'fa-clock': booking.status === 'PENDING',
+                                     'fa-check': booking.status === 'CONFIRMED'
+                                   }"></i>
+                                {{ getBookingStatusText(booking.status) }}
+                                <span *ngIf="isBookingActive(booking)" class="active-label">Đang thuê</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="date-time-grid">
+                    <div class="date-group">
+                        <label class="date-label">
+                            <i class="fa-solid fa-calendar-plus"></i>
+                            Ngày nhận xe
+                        </label>
+                        <div class="datetime-inputs">
+                            <input type="date" [(ngModel)]="pickupDate" class="date-input" [min]="getMinPickupDate()">
+                            <input type="time" [(ngModel)]="pickupTime" class="time-input">
+                        </div>
+                    </div>
+
+                    <div class="date-group">
+                        <label class="date-label">
+                            <i class="fa-solid fa-calendar-minus"></i>
+                            Ngày trả xe
+                        </label>
+                        <div class="datetime-inputs">
+                            <input type="date" [(ngModel)]="returnDate" class="date-input" [min]="getMinReturnDate()">
+                            <input type="time" [(ngModel)]="returnTime" class="time-input">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Price Summary -->
+                <div class="price-summary">
+                    <div class="price-breakdown">
+                        <div class="price-row">
+                            <span>{{ formatPrice(car.pricePerDay) }}K × {{ calculateDays() }} ngày</span>
+                            <span>{{ formatPrice(calculateTotalPrice()) }}K</span>
+                        </div>
+                        <div class="price-row total">
+                            <span>Tổng cộng</span>
+                            <span class="total-amount">{{ formatPrice(calculateTotalPrice()) }}K</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Booking Error Message -->
+                <div *ngIf="bookingError" class="booking-error">
+                    <i class="fa-solid fa-exclamation-triangle"></i>
+                    <span>{{ bookingError }}</span>
+                </div>
+
+                <!-- Booking Success Message -->
+                <div *ngIf="bookingSuccess" class="booking-success">
+                    <i class="fa-solid fa-check-circle"></i>
+                    <span>Đặt xe thành công! Đang chuyển hướng...</span>
+                </div>
+
+                <!-- Book Button -->
+                <button class="book-button"
+                    [disabled]="car.status === 'UNAVAILABLE' || bookingLoading"
+                    (click)="onBookNow()">
+                    <i *ngIf="!bookingLoading" class="fa-solid fa-calendar-check"></i>
+                    <i *ngIf="bookingLoading" class="dots-loader-booking">
+                        <span></span><span></span><span></span>
+                    </i>
+
+                    <span *ngIf="!bookingLoading && !isAuthenticated">Đăng nhập để đặt xe</span>
+                    <span *ngIf="!bookingLoading && isAuthenticated && car.status === 'AVAILABLE' || car.status === 'BOOKED'">Đặt xe ngay</span>
+                    <span *ngIf="!bookingLoading && isAuthenticated && car.status === 'UNAVAILABLE'">Xe không khả dụng</span>
+                </button>
+            </div>
+
+            <!-- Reviews Section -->
+            <div class="reviews-section">
+                <div class="reviews-header">
+                    <h3 class="section-title">
+                        <i class="fa-solid fa-star"></i>
+                        Đánh giá ({{ reviews.length }})
+                    </h3>
+                    <div class="overall-rating">
+                        <span class="rating-number">{{ getAverageRating() }}</span>
+                        <div class="rating-stars">
+                            <i *ngFor="let star of getRatingStars(getAverageRating())" class="fa-solid fa-star"
+                                [class.filled]="star">
+                            </i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="reviews-list">
+                    <div *ngFor="let review of reviews" class="review-item">
+                        <div class="review-header">
+                            <div class="reviewer-info">
+                                <i class="fa-regular fa-user"></i>
+                                <div class="reviewer-details">
+                                    <span class="reviewer-name">{{ review.userName }}</span>
+                                    <span class="review-date">{{ review.date | date:'dd/MM/yyyy' }}</span>
+                                </div>
+                            </div>
+                            <div class="review-rating">
+                                <i *ngFor="let star of getRatingStars(review.rating)" class="fa-solid fa-star"
+                                    [class.filled]="star">
+                                </i>
+                            </div>
+                        </div>
+                        <p class="review-comment">{{ review.comment }}</p>
+                    </div>
+                </div>
+
+                <!-- Show all reviews button -->
+                <button class="show-all-reviews" *ngIf="reviews.length > 3">
+                    Xem tất cả {{ reviews.length }} đánh giá
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

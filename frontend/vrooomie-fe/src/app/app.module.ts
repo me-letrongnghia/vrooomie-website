@@ -14,10 +14,11 @@ import { BecomeCarOwnerComponent } from './components/become-car-owner/become-ca
 import { LoginComponent } from './components/login/login.component';
 import { RegisterComponent } from './components/register/register.component';
 import { CommonModule } from '@angular/common';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { UserDetailInfoComponent } from './components/user-detail-info/user-detail-info.component';
 import { LoaderComponent } from './shared/loader/loader.component';
 import { CarDetailComponent } from './components/car-detail/car-detail.component';
+import { AuthInterceptor } from './interceptors/auth.interceptor';
 
 @NgModule({
   declarations: [
@@ -45,7 +46,12 @@ import { CarDetailComponent } from './components/car-detail/car-detail.component
     CommonModule
   ],
   providers: [
-    provideClientHydration(withEventReplay())
+    provideClientHydration(withEventReplay()),
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: AuthInterceptor,
+      multi: true
+    }
   ],
   bootstrap: [AppComponent]
 })

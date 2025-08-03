@@ -2,8 +2,8 @@
     <h2>Xe Dành Cho Bạn</h2>
 
     <!-- Loading State -->
-    <div *ngIf="loading" class="loading-state">
-        <p>Đang tải danh sách xe...</p>
+    <div class="dots-loader" *ngIf="loading">
+        <span></span><span></span><span></span>
     </div>
 
     <!-- Error State -->
@@ -22,9 +22,8 @@
                 </div>
                 <div class="car-info">
                     <div class="car-tags">
-                        <span class="tag green" *ngIf="car.status === 'AVAILABLE'">Có sẵn</span>
-                        <span class="tag red" *ngIf="car.status === 'RENTED'">Đã thuê</span>
-                        <span class="tag yellow" *ngIf="car.status === 'MAINTENANCE'">Bảo trì</span>
+                        <span class="status-tag" [ngClass]="getStatusClass(car.status)">{{ getStatusText(car.status)
+                            }}</span>
                     </div>
                     <h3> {{ car.brand }} {{ car.model }} </h3>
                     <div class="car-details">

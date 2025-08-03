@@ -39,7 +39,7 @@ public class Car {
     private BigDecimal pricePerDay;
 
     @Enumerated(EnumType.STRING)
-    private CarStatus status = CarStatus.AVAILABLE;
+    private CarStatus status;
 
     private String imageUrl;
 

@@ -1,6 +1,6 @@
 .vrooomie-cars {
     background: #f7f7f7;
-    padding: 48px 0 56px 0;
+    padding: 1px 0 36px 0;
     margin-top: 48px;
     text-align: center;
 }
@@ -88,25 +88,32 @@
 }
 
 .car-tags {
-    margin-bottom: 4px;
+    margin-bottom: 6px;
 }
 
-.tag {
-    display: inline-block;
-    font-size: 0.95rem;
-    padding: 2px 10px;
-    border-radius: 12px;
-    margin-right: 6px;
-    margin-bottom: 2px;
-    font-weight: 500;
-    background: #f5f5f5;
-    color: #4caf50;
-    border: 1px solid #4caf50;
+.status-available {
+    background: #d4edda;
+    color: #000000;
 }
 
-.tag.orange {
-    background: #fff3e0;
-    color: #ff9800;
+.status-rented {
+    background: #f8d7da;
+    color: #000000;
+}
+
+.status-maintenance {
+    background: #fff3cd;
+    color: #000000;
+}
+
+.status-tag {
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .car-info h3 {
@@ -135,7 +142,7 @@
 }
 
 .car-rating .star {
-    color: #ffb300;
+    color: rgb(255, 198, 52);
     font-size: 1.1rem;
 }
 
@@ -173,15 +180,45 @@
 }
 
 /* Loading, Error, and No Cars States */
-.loading-state {
-    padding: 60px 20px;
-    text-align: center;
+.dots-loader {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
 }
 
-.loading-state p {
-    font-size: 1.2rem;
-    color: #666;
-    margin: 0;
+.dots-loader span {
+    width: 10px;
+    height: 10px;
+    background: #4caf50;
+    border-radius: 50%;
+    display: inline-block;
+    animation: dots-bounce 0.6s infinite alternate;
+}
+
+.dots-loader span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.dots-loader span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes dots-bounce {
+    to {
+        transform: translateY(-10px);
+        opacity: 0.5;
+    }
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 .error-state {
@@ -220,22 +257,6 @@
     font-size: 1.2rem;
     color: #666;
     margin: 0;
-}
-
-/* Additional status tag styles */
-.tag.red {
-    background: #ffebee;
-    color: #f44336;
-}
-
-.tag.yellow {
-    background: #fff8e1;
-    color: #ff9800;
-}
-
-.tag.green {
-    background: #e8f5e8;
-    color: #4caf50;
 }
 
 .car-description {

@@ -31,7 +31,8 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/api/cars/**").permitAll() // Allow public access to car endpoints
+                .requestMatchers("/api/cars", "/api/cars/**").permitAll() // Allow public access to car endpoints
+                .requestMatchers("/api/bookings/car/**").permitAll() // Allow public access to view car bookings
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session

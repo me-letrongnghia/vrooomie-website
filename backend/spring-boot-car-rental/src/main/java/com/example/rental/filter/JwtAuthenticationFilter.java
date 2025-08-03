@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.List;
+import io.jsonwebtoken.ExpiredJwtException;
 
 @Component
 @RequiredArgsConstructor
@@ -35,7 +36,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         final String token = authHeader.substring(7);
-        final String email = jwtUtil.extractEmail(token);
+        String email = null;
+        try {
+            email = jwtUtil.extractEmail(token);
+        } catch (ExpiredJwtException e) {
+            // Token hết hạn, cho qua filter chain như anonymous
+            filterChain.doFilter(request, response);
+            return;
+        } catch (Exception e) {
+            // Token không hợp lệ, cho qua filter chain như anonymous
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             User user = userRepository.findByEmail(email).orElse(null);

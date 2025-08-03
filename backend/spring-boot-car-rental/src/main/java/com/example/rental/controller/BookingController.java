@@ -56,4 +56,10 @@ public class BookingController {
         List<BookingDto> bookings = iBookingService.getBookingsForOwnedCarsByStatus(owner, status);
         return ResponseEntity.ok(bookings);
     }
+
+    @GetMapping("/car/{carId}")
+    public ResponseEntity<List<BookingDto>> getBookingsForCar(@PathVariable Long carId) {
+        List<BookingDto> bookings = iBookingService.getBookingsForCar(carId);
+        return ResponseEntity.ok(bookings);
+    }
 }
