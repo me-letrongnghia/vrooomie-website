@@ -1,1 +1,301 @@
-<p>user-detail-info works!</p>
+<div class="user-detail-container">
+
+  <div class="content-wrapper">
+    <!-- Sidebar Menu -->
+    <div class="sidebar">
+      <div class="menu-list">
+        <h1>Xin chào bạn!</h1>
+
+        <div class="menu-item" [class.active]="activeMenu === 'account'" (click)="onMenuClick('account')">
+          <span class="menu-icon"><i class="fa-regular fa-user"></i></span>
+          <span class="menu-label">Tài khoản của tôi</span>
+        </div>
+
+        <div class="menu-item" [class.active]="activeMenu === 'favorites'" (click)="onMenuClick('favorites')">
+          <span class="menu-icon"><i class="fa-regular fa-heart"></i></span>
+          <span class="menu-label">Xe yêu thích</span>
+        </div>
+
+        <div class="menu-item" [class.active]="activeMenu === 'my-cars'" (click)="onMenuClick('my-cars')">
+          <span class="menu-icon"><i class="fa-solid fa-car"></i></span>
+          <span class="menu-label">Xe của tôi</span>
+        </div>
+
+        <div class="menu-item" [class.active]="activeMenu === 'my-trips'" (click)="onMenuClick('my-trips')">
+          <span class="menu-icon"><i class="fa-solid fa-road"></i></span>
+          <span class="menu-label">Chuyến của tôi</span>
+        </div>
+
+        <div class="menu-item" [class.active]="activeMenu === 'long-term-rental'"
+          (click)="onMenuClick('long-term-rental')">
+          <span class="menu-icon"><i class="fa-solid fa-file-invoice"></i></span>
+          <span class="menu-label">Thuê xe dài hạn</span>
+        </div>
+
+        <div class="menu-item" [class.active]="activeMenu === 'gifts'" (click)="onMenuClick('gifts')">
+          <span class="menu-icon"><i class="fa-solid fa-gift"></i></span>
+          <span class="menu-label">Quà tặng</span>
+        </div>
+
+        <div class="menu-item" [class.active]="activeMenu === 'addresses'" (click)="onMenuClick('addresses')">
+          <span class="menu-icon"><i class="fa-solid fa-location-dot"></i></span>
+          <span class="menu-label">Địa chỉ của tôi</span>
+        </div>
+
+        <div class="menu-item" [class.active]="activeMenu === 'change-password'"
+          (click)="onMenuClick('change-password')">
+          <span class="menu-icon"><i class="fa-solid fa-lock"></i></span>
+          <span class="menu-label">Đổi mật khẩu</span>
+        </div>
+
+        <div class="menu-item" [class.active]="activeMenu === 'delete-account'" (click)="onMenuClick('delete-account')">
+          <span class="menu-icon"><i class="fa-solid fa-trash"></i></span>
+          <span class="menu-label">Yêu cầu xóa tài khoản</span>
+        </div>
+
+        <div class="menu-item" [class.active]="activeMenu === 'logout'" (click)="onMenuClick('logout')">
+          <span class="menu-icon"><i class="fa-solid fa-arrow-right-from-bracket"></i></span>
+          <span class="menu-label">Đăng xuất</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+
+      <!-- Tài khoản của tôi Content -->
+      <div *ngIf="activeMenu === 'account'" class="content-section">
+        
+        <!-- Authentication Loading State -->
+        <div *ngIf="isAuthLoading" class="loading-container">
+          <div class="dots-loader">
+            <span></span><span></span><span></span>
+          </div>
+        </div>
+
+        <!-- Error State -->
+        <div *ngIf="error && !loading && !isAuthLoading" class="error-container">
+          <div class="error-message">
+            <i class="fa-solid fa-exclamation-triangle"></i>
+            <h3>Có lỗi xảy ra</h3>
+            <p>{{ error }}</p>
+            <button class="primary-btn" (click)="loadUserDetail()">Thử lại</button>
+          </div>
+        </div>
+
+        <!-- User Profile Section -->
+        <div *ngIf="userDetail && !loading && !error && !isAuthLoading" class="user-profile">
+          <div class="avatar-section">
+            <img [src]="getAvatarUrl()" [alt]="userDetail?.avatar" class="user-avatar">
+            <div class="user-basic-info">
+              <h2 class="user-name">{{ userDetail?.fullName }}</h2>
+              <p class="join-date">Tham gia: {{ formatJoinDate(userDetail?.createdAt) }}</p>
+              <div class="points-badge">
+                <span class="crown-icon">👑</span>
+                <span>{{ userDetail?.points }} điểm</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Personal Information Section -->
+        <div *ngIf="userDetail && !loading && !error && !isAuthLoading" class="personal-info">
+          <div class="info-row">
+            <span class="info-label">Ngày sinh</span>
+            <span class="info-value">{{ formatBirthDate(userDetail?.birthDate) }}</span>
+          </div>
+
+          <div class="info-row">
+            <span class="info-label">Giới tính</span>
+            <span class="info-value">{{ userDetail?.gender }}</span>
+          </div>
+
+          <div class="info-row">
+            <span class="info-label">Số điện thoại</span>
+            <div class="info-value-with-action">
+              <span class="verification-badge verified">Chưa xác thực</span>
+              <span class="info-value">{{ userDetail?.phone }}</span>
+              <button class="edit-btn small" (click)="onEditPhone()">✏️</button>
+            </div>
+          </div>
+
+          <div class="info-row">
+            <span class="info-label">Email</span>
+            <div class="info-value-with-action">
+              <span *ngIf="!userDetail?.email" class="verification-badge unverified">Chưa xác thực</span>
+              <span *ngIf="userDetail?.email" class="info-value">{{ userDetail?.email }}</span>
+              <span *ngIf="!userDetail?.email" class="info-value add-link" (click)="onAddEmail()">Thêm email</span>
+              <button class="edit-btn small" (click)="onAddEmail()">✏️</button>
+            </div>
+          </div>
+
+          <div class="info-row">
+            <span class="info-label">Facebook</span>
+            <div class="info-value-with-action">
+              <span class="info-value add-link" (click)="onAddFacebook()">Thêm liên kết</span>
+              <button class="edit-btn small" (click)="onAddFacebook()">✏️</button>
+            </div>
+          </div>
+
+          <div class="info-row">
+            <span class="info-label">Google</span>
+            <div class="info-value-with-action">
+              <span class="info-value add-link" (click)="onAddGoogle()">Thêm liên kết</span>
+              <button class="edit-btn small" (click)="onAddGoogle()">✏️</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Driver License Section -->
+        <!-- <div class="driver-license-section">
+          <div class="license-header">
+            <span class="license-title">Giấy phép lái xe</span>
+            <span class="license-status unverified">{{ userInfo.driverLicense.status }}</span>
+            <button class="edit-btn" (click)="onEditDriverLicense()">Chỉnh sửa</button>
+          </div>
+        </div> -->
+
+        <!-- Warning Notice -->
+        <div *ngIf="userDetail && !loading && !error && !isAuthLoading" class="warning-notice">
+          <p><strong>Lưu ý:</strong> để tránh phạt sinh vận để trong quá trình thuê xe,
+            <strong>người đặt xe</strong> trên Mioto (đã xác thực GPLX)
+            <strong>ĐỒNG THỜI</strong> phải là <strong>người nhận xe</strong>.
+          </p>
+        </div>
+      </div>
+
+      <!-- Xe yêu thích Content -->
+      <div *ngIf="activeMenu === 'favorites'" class="content-section">
+        <div class="section-header">
+          <h2><i class="fa-regular fa-heart"></i> Xe yêu thích</h2>
+          <p>Danh sách xe bạn đã yêu thích</p>
+        </div>
+        <div class="empty-state">
+          <i class="fa-regular fa-heart empty-icon"></i>
+          <p>Bạn chưa có xe yêu thích nào</p>
+          <p>Hãy khám phá và thêm những chiếc xe bạn thích vào danh sách!</p>
+        </div>
+      </div>
+
+      <!-- Xe của tôi Content -->
+      <div *ngIf="activeMenu === 'my-cars'" class="content-section">
+        <div class="section-header">
+          <h2><i class="fa-solid fa-car"></i> Xe của tôi</h2>
+          <p>Quản lý danh sách xe của bạn</p>
+        </div>
+        <div class="empty-state">
+          <i class="fa-solid fa-car empty-icon"></i>
+          <p>Bạn chưa có xe nào</p>
+          <p>Đăng ký xe của bạn để bắt đầu cho thuê!</p>
+          <button class="primary-btn">Đăng ký xe</button>
+        </div>
+      </div>
+
+      <!-- Chuyến của tôi Content -->
+      <div *ngIf="activeMenu === 'my-trips'" class="content-section">
+        <div class="section-header">
+          <h2><i class="fa-solid fa-road"></i> Chuyến của tôi</h2>
+          <p>Lịch sử các chuyến đi của bạn</p>
+        </div>
+        <div class="empty-state">
+          <i class="fa-solid fa-road empty-icon"></i>
+          <p>Bạn chưa có chuyến đi nào</p>
+          <p>Hãy thuê xe và bắt đầu cuộc phiêu lưu của bạn!</p>
+          <button class="primary-btn">Tìm xe</button>
+        </div>
+      </div>
+
+      <!-- Đơn hàng Thuê xe dài hạn Content -->
+      <div *ngIf="activeMenu === 'long-term-rental'" class="content-section">
+        <div class="section-header">
+          <h2><i class="fa-solid fa-file-invoice"></i>Thuê xe dài hạn</h2>
+          <p>Quản lý các xe thuê dài hạn</p>
+        </div>
+        <div class="empty-state">
+          <i class="fa-solid fa-file-invoice empty-icon"></i>
+          <p>Bạn chưa có xe thuê dài hạn nào</p>
+          <p>Thuê xe dài hạn để có giá tốt hơn cho chuyến đi dài ngày!</p>
+        </div>
+      </div>
+
+      <!-- Quà tặng Content -->
+      <div *ngIf="activeMenu === 'gifts'" class="content-section">
+        <div class="section-header">
+          <h2><i class="fa-solid fa-gift"></i> Quà tặng</h2>
+          <p>Voucher và quà tặng dành cho bạn</p>
+        </div>
+        <div class="empty-state">
+          <i class="fa-solid fa-gift empty-icon"></i>
+          <p>Bạn chưa có quà tặng nào</p>
+          <p>Tham gia các chương trình khuyến mãi để nhận quà tặng!</p>
+        </div>
+      </div>
+
+      <!-- Địa chỉ của tôi Content -->
+      <div *ngIf="activeMenu === 'addresses'" class="content-section">
+        <div class="section-header">
+          <h2><i class="fa-solid fa-location-dot"></i> Địa chỉ của tôi</h2>
+          <p>Quản lý các địa chỉ giao nhận xe</p>
+        </div>
+        <div class="empty-state">
+          <i class="fa-solid fa-location-dot empty-icon"></i>
+          <p>Bạn chưa có địa chỉ nào</p>
+          <p>Thêm địa chỉ để thuê xe dễ dàng hơn!</p>
+          <button class="primary-btn">Thêm địa chỉ</button>
+        </div>
+      </div>
+
+      <!-- Đổi mật khẩu Content -->
+      <div *ngIf="activeMenu === 'change-password'" class="content-section">
+        <div class="section-header">
+          <h2><i class="fa-solid fa-lock"></i> Đổi mật khẩu</h2>
+          <p>Thay đổi mật khẩu tài khoản của bạn</p>
+        </div>
+        <div class="form-container">
+          <div class="form-group">
+            <label>Mật khẩu hiện tại</label>
+            <input type="password" placeholder="Nhập mật khẩu hiện tại">
+          </div>
+          <div class="form-group">
+            <label>Mật khẩu mới</label>
+            <input type="password" placeholder="Nhập mật khẩu mới">
+          </div>
+          <div class="form-group">
+            <label>Xác nhận mật khẩu mới</label>
+            <input type="password" placeholder="Nhập lại mật khẩu mới">
+          </div>
+          <button class="primary-btn">Cập nhật mật khẩu</button>
+        </div>
+      </div>
+
+      <!-- Yêu cầu xóa tài khoản Content -->
+      <div *ngIf="activeMenu === 'delete-account'" class="content-section">
+        <div class="section-header">
+          <h2><i class="fa-solid fa-trash"></i> Yêu cầu xóa tài khoản</h2>
+          <p>Xóa vĩnh viễn tài khoản của bạn</p>
+        </div>
+        <div class="warning-box">
+          <i class="fa-solid fa-exclamation-triangle"></i>
+          <h3>Cảnh báo!</h3>
+          <p>Hành động này không thể hoàn tác. Tất cả dữ liệu của bạn sẽ bị xóa vĩnh viễn.</p>
+          <button class="danger-btn">Xóa tài khoản</button>
+        </div>
+      </div>
+
+      <!-- Đăng xuất Content -->
+      <div *ngIf="activeMenu === 'logout'" class="content-section">
+        <div class="section-header">
+          <h2><i class="fa-solid fa-arrow-right-from-bracket"></i> Đăng xuất</h2>
+          <p>Bạn có chắc chắn muốn đăng xuất?</p>
+        </div>
+        <div class="logout-confirmation">
+          <p>Bạn sẽ cần đăng nhập lại để sử dụng dịch vụ.</p>
+          <div class="button-group">
+            <button class="danger-btn" (click)="onLogout()">Đăng xuất</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

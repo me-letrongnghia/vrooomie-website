@@ -188,7 +188,7 @@ export class AuthService {
         })
       );
   }
-
+  
   // Logout method
   logout() {
     console.log('Logging out user'); // Debug log
@@ -221,6 +221,11 @@ export class AuthService {
   // Get current user
   getCurrentUser() {
     return this.currentUserSubject.value;
+  }
+
+  // Get user detail
+  getUserDetail() {
+    return this.httpClient.get(`${this.authUrl}/me`);
   }
 
   // Check if user is authenticated

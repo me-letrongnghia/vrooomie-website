@@ -28,6 +28,11 @@ public class CarController {
         return iCarService.getCarById(id);
     }
 
+    @GetMapping("/owner/{ownerId}")
+    public List<CarDto> getCarsByOwnerId(@PathVariable Long ownerId) {
+        return iCarService.getCarsByOwnerId(ownerId);
+    }
+
     @PostMapping("/create")
     public CarDto createCar(@RequestBody CarRequest request, @AuthenticationPrincipal User owner) {
         return iCarService.createCar(request, owner);

@@ -69,5 +69,13 @@ public class CarServiceImpl implements ICarService {
         }
         carRepository.deleteById(id);
     }
+
+    @Override
+    @Cacheable(value = "cars", key = "#ownerId")
+    public List<CarDto> getCarsByOwnerId(Long ownerId) {
+        return carRepository.findByOwnerId(ownerId).stream()
+                .map(CarMapper::toDto)
+                .collect(Collectors.toList());
+    }
 }
 

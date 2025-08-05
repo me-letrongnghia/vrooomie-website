@@ -9,6 +9,7 @@ import java.util.List;
 public interface ICarService {
     List<CarDto> getAllCars();
     CarDto getCarById(Long id);
+    List<CarDto> getCarsByOwnerId(Long ownerId);
     CarDto createCar(CarRequest request, User owner);
     CarDto updateCar(Long id, CarDto carDto);
     void deleteCar(Long id);
