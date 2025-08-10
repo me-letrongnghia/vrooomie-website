@@ -29,6 +29,7 @@ public class Car {
     private User owner;
 
     private String brand;
+    
     private String model;
 
     @Column(unique = true)

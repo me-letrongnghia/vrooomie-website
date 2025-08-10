@@ -25,6 +25,20 @@ public class User {
 
     private String fullName;
 
+    private String phoneNumber;
+
+    private String address;
+
+    private String birthDate;
+
+    private String gender;
+
+    private String driverLicense;
+
+    private String driverLicenseExpiryDate;
+
+    private String driverLicenseImage;
+
     @Column(unique = true, nullable = false)
     private String email;
 

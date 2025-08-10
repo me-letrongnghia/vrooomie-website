@@ -34,7 +34,7 @@
 }
 .dots-loader span {
   width: 10px; height: 10px;
-  background: #4caf50;
+  background: #5fcf86;
   border-radius: 50%;
   display: inline-block;
   animation: dots-bounce 0.6s infinite alternate;

@@ -1,0 +1,176 @@
+<!-- Delivery Address Modal -->
+<div class="delivery-modal" (click)="onClose()" *ngIf="!isDeliveryCalculated">
+  <div class="delivery-container" (click)="$event.stopPropagation()">
+    <button class="close-button" (click)="onClose()">✕</button>
+    <h2>Chọn địa chỉ giao xe</h2>
+    
+    <div class="delivery-content">
+      <!-- Map Section (Left) -->
+      <div class="map-section">
+        <div class="map-container" #mapContainer>
+          <div class="map-placeholder" *ngIf="!mapLoaded">
+            <i class="fas fa-map-marked-alt"></i>
+            <p>Đang tải bản đồ...</p>
+          </div>
+          
+          <!-- Simple map implementation using Google Maps API -->
+          <div id="delivery-map" class="delivery-map" *ngIf="mapLoaded"></div>
+          
+          <!-- Delivery radius indicator -->
+          <div class="radius-info">
+            <i class="fas fa-info-circle"></i>
+            <span>Giao xe trong bán kính 10km</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Form Section (Right) -->
+      <div class="form-section">
+        <form [formGroup]="deliveryForm" (ngSubmit)="calculateDelivery()">
+          <!-- Address Input -->
+          <div class="form-group">
+            <label for="address">Địa chỉ cụ thể</label>
+            <input 
+              type="text" 
+              id="address" 
+              name="address" 
+              placeholder="Nhập địa chỉ đầy đủ"
+              formControlName="address" 
+              required 
+              #addressInput
+              (input)="onAddressChange($event)"
+            />
+            <div class="input-requirements" *ngIf="address?.invalid && (address?.dirty || address?.touched)">
+              <small>Vui lòng nhập địa chỉ giao xe</small>
+            </div>
+          </div>
+
+          <!-- Address Suggestions -->
+          <div class="address-suggestions" *ngIf="addressSuggestions.length > 0">
+            <div 
+              class="suggestion-item" 
+              *ngFor="let suggestion of addressSuggestions" 
+              (click)="selectSuggestion(suggestion)"
+            >
+              <i class="fas fa-map-marker-alt"></i>
+              <span>{{ suggestion.description }}</span>
+            </div>
+          </div>
+
+          <!-- Contact Information -->
+          <div class="form-group">
+            <label for="contactName">Tên người nhận</label>
+            <input 
+              type="text" 
+              id="contactName" 
+              name="contactName" 
+              placeholder="Nhập tên người nhận xe"
+              formControlName="contactName" 
+              required 
+            />
+            <div class="input-requirements" *ngIf="contactName?.invalid && (contactName?.dirty || contactName?.touched)">
+              <small>Vui lòng nhập tên người nhận</small>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="contactPhone">Số điện thoại</label>
+            <input 
+              type="tel" 
+              id="contactPhone" 
+              name="contactPhone" 
+              placeholder="Nhập số điện thoại liên hệ"
+              formControlName="contactPhone" 
+              required 
+            />
+            <div class="input-requirements" *ngIf="contactPhone?.invalid && (contactPhone?.dirty || contactPhone?.touched)">
+              <small>Vui lòng nhập số điện thoại hợp lệ</small>
+            </div>
+          </div>
+
+          <!-- Notes -->
+          <div class="form-group">
+            <label for="notes">Ghi chú (tùy chọn)</label>
+            <textarea 
+              id="notes" 
+              name="notes" 
+              placeholder="Ghi chú thêm về địa điểm giao xe..."
+              formControlName="notes"
+              rows="3"
+            ></textarea>
+          </div>
+
+          <!-- Error Messages -->
+          <div class="delivery-error" *ngIf="deliveryError">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span>{{ deliveryError }}</span>
+          </div>
+
+          <!-- Calculate Button -->
+          <button 
+            type="submit" 
+            class="calculate-button"
+            [disabled]="deliveryForm.invalid || calculating"
+          >
+            <span *ngIf="!calculating">
+              <i class="fas fa-calculator"></i>
+              Tính phí giao xe
+            </span>
+            <div class="dots-loader" *ngIf="calculating">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delivery Calculation Result Modal -->
+<div class="delivery-result-modal" (click)="onClose()" *ngIf="isDeliveryCalculated">
+  <div class="delivery-result-container" (click)="$event.stopPropagation()">
+    <button class="close-button" (click)="onClose()">✕</button>
+    <h2>Thông tin giao xe</h2>
+    
+    <div class="delivery-summary">
+      <div class="address-info">
+        <i class="fas fa-map-marker-alt"></i>
+        <div class="address-details">
+          <h4>Địa chỉ giao xe</h4>
+          <p>{{ selectedAddress }}</p>
+        </div>
+      </div>
+
+      <div class="distance-info">
+        <div class="distance-item">
+          <span class="label">Khoảng cách:</span>
+          <span class="value">{{ calculatedDistance }} km</span>
+        </div>
+        <div class="distance-item">
+          <span class="label">Phí giao xe:</span>
+          <span class="value delivery-fee">{{ formatPrice(deliveryFee) }}đ</span>
+        </div>
+      </div>
+
+      <div class="contact-info">
+        <h4>Thông tin liên hệ</h4>
+        <p><strong>Người nhận:</strong> {{ deliveryForm.get('contactName')?.value }}</p>
+        <p><strong>Số điện thoại:</strong> {{ deliveryForm.get('contactPhone')?.value }}</p>
+        <p *ngIf="deliveryForm.get('notes')?.value"><strong>Ghi chú:</strong> {{ deliveryForm.get('notes')?.value }}</p>
+      </div>
+    </div>
+
+    <div class="result-actions">
+      <button class="back-button" (click)="goBackToForm()">
+        <i class="fas fa-arrow-left"></i>
+        Chỉnh sửa
+      </button>
+      <button class="confirm-button" (click)="confirmDelivery()">
+        <i class="fas fa-check"></i>
+        Xác nhận
+      </button>
+    </div>
+  </div>
+</div>

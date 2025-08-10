@@ -34,10 +34,18 @@ public class Booking {
     private User renter;
 
     private LocalDate startDate;
+
     private LocalDate endDate;
 
     @Enumerated(EnumType.STRING)
     private BookingStatus status = BookingStatus.PENDING;
+
+    public enum BookingStatus {
+        PENDING,
+        CONFIRMED,
+        CANCELED,
+        COMPLETED
+    }
 
     private BigDecimal totalPrice;
 
@@ -45,10 +53,32 @@ public class Booking {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    public enum BookingStatus {
+    @Enumerated(EnumType.STRING)
+    private PaymentMethod paymentMethod;
+
+    public enum PaymentMethod {
+        CASH,
+        CREDIT_CARD,
+        PAYPAL,
+        ZALO_PAY,
+        MOMO,
+        VNPAY
+    }
+
+    @Enumerated(EnumType.STRING)
+    private PaymentStatus paymentStatus;
+
+    public enum PaymentStatus {
         PENDING,
-        CONFIRMED,
-        CANCELED,
-        COMPLETED
+        PAID,
+        FAILED
+    }
+
+    @Enumerated(EnumType.STRING)
+    private DeliveryMethod deliveryMethod;
+
+    public enum DeliveryMethod {
+        DELIVERY,
+        PICKUP
     }
 }

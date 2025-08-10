@@ -6,6 +6,7 @@ import { LoadingService } from '../../services/loading.service';
 import { BookingService, BookingRequest, BookingResponse } from '../../services/booking.service';
 import { AuthService } from '../../services/auth.service';
 import { AppComponent } from '../../app.component';
+import { DeliveryInfo } from '../delivery-address-modal/delivery-address-modal.component';
 
 interface Review {
   id: number;
@@ -44,7 +45,17 @@ export class CarDetailComponent implements OnInit {
 
   // Existing bookings for this car
   existingBookings: BookingResponse[] = [];
-  bookingsLoading = false;
+  bookingsLoading = true;
+  showAllBookings: boolean = false;
+
+  // Delivery and Payment methods
+  selectedDeliveryMethod: 'PICKUP' | 'DELIVERY' = 'PICKUP';
+  selectedPaymentMethod: 'CASH' | 'ONLINE' = 'CASH';
+  showDeliveryModal = false;
+  deliveryInfo: DeliveryInfo | null = null;
+  
+  // Insurance options
+  additionalInsuranceSelected = false;
 
   // Mock reviews data
   reviews: Review[] = [
@@ -175,6 +186,29 @@ export class CarDetailComponent implements OnInit {
     return new Intl.NumberFormat('vi-VN').format(price);
   }
 
+  // Format price in K format (like car list)
+  formatPriceK(price: number): string {
+    if (price >= 1000) {
+      return (price / 1000).toLocaleString('vi-VN');
+    }
+    return price.toLocaleString('vi-VN');
+  }
+
+  // Helper function for Math operations in template
+  Math = Math;
+
+  // Format date for display
+  formatDateDisplay(dateString: string): string {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('vi-VN', { 
+      weekday: 'long', 
+      year: 'numeric', 
+      month: '2-digit', 
+      day: '2-digit' 
+    });
+  }
+
   // Format date string to Vietnamese locale
   formatDate(dateString: string): string {
     const date = new Date(dateString);
@@ -246,9 +280,54 @@ export class CarDetailComponent implements OnInit {
 
   calculateTotalPrice(): number {
     if (this.car) {
+      const days = this.calculateDays();
+      const basePrice = this.car.pricePerDay * days;
+      const mandatoryInsurance = Math.round(this.car.pricePerDay * 0.1) * days; // 10% insurance per day
+      const additionalInsurance = this.additionalInsuranceSelected 
+        ? Math.round(this.car.pricePerDay * 0.05) * days // 5% additional insurance per day
+        : 0;
+      const deliveryFee = this.selectedDeliveryMethod === 'DELIVERY' && this.deliveryInfo 
+        ? this.deliveryInfo.deliveryFee 
+        : 0;
+      
+      return basePrice + mandatoryInsurance + additionalInsurance + deliveryFee;
+    }
+    return 0;
+  }
+
+  getDeliveryFee(): number {
+    return this.selectedDeliveryMethod === 'DELIVERY' && this.deliveryInfo 
+      ? this.deliveryInfo.deliveryFee 
+      : 0;
+  }
+
+  // Calculate total base price for all days
+  getTotalBasePrice(): number {
+    if (this.car) {
       return this.car.pricePerDay * this.calculateDays();
     }
     return 0;
+  }
+
+  // Calculate total mandatory insurance for all days
+  getTotalMandatoryInsurance(): number {
+    if (this.car) {
+      return Math.round(this.car.pricePerDay * 0.1) * this.calculateDays();
+    }
+    return 0;
+  }
+
+  // Calculate total additional insurance for all days
+  getTotalAdditionalInsurance(): number {
+    if (this.car && this.additionalInsuranceSelected) {
+      return Math.round(this.car.pricePerDay * 0.05) * this.calculateDays();
+    }
+    return 0;
+  }
+
+  // Handler for additional insurance checkbox
+  onAdditionalInsuranceChange(event: any): void {
+    this.additionalInsuranceSelected = event.target.checked;
   }
 
   // Validation methods
@@ -453,5 +532,67 @@ export class CarDetailComponent implements OnInit {
     // Open image gallery modal or navigate to gallery page
     console.log('Opening image gallery with images:', this.carImages);
     // Implementation for image gallery modal
+  }
+
+  // Delivery method handlers
+  onDeliveryMethodChange(method: 'PICKUP' | 'DELIVERY'): void {
+    this.selectedDeliveryMethod = method;
+    
+    if (method === 'PICKUP') {
+      // Reset delivery info when switching to pickup
+      this.deliveryInfo = null;
+    } else if (method === 'DELIVERY') {
+      // Show delivery address modal
+      this.showDeliveryModal = true;
+    }
+  }
+
+  onDeliveryModalClose(): void {
+    this.showDeliveryModal = false;
+    // If user closes modal without confirming delivery, switch back to pickup
+    if (!this.deliveryInfo) {
+      this.selectedDeliveryMethod = 'PICKUP';
+    }
+  }
+
+  onDeliveryConfirmed(deliveryInfo: DeliveryInfo): void {
+    this.deliveryInfo = deliveryInfo;
+    this.showDeliveryModal = false;
+    console.log('Delivery confirmed:', deliveryInfo);
+  }
+
+  // Payment method handlers
+  onPaymentMethodChange(method: 'CASH' | 'ONLINE'): void {
+    this.selectedPaymentMethod = method;
+  }
+
+  // Get delivery method display text
+  getDeliveryMethodText(): string {
+    if (this.selectedDeliveryMethod === 'DELIVERY' && this.deliveryInfo) {
+      return `Giao xe tận nơi - ${this.deliveryInfo.address}`;
+    }
+    return this.selectedDeliveryMethod === 'DELIVERY' 
+      ? 'Giao xe tận nơi' 
+      : 'Tự đến lấy xe';
+  }
+
+  // Get payment method display text
+  getPaymentMethodText(): string {
+    return this.selectedPaymentMethod === 'CASH' 
+      ? 'Thanh toán khi nhận xe' 
+      : 'Thanh toán trực tuyến';
+  }
+
+  // Toggle showing all bookings
+  toggleAllBookings(): void {
+    this.showAllBookings = !this.showAllBookings;
+  }
+
+  // Get visible bookings (show only first one initially)
+  getVisibleBookings(): BookingResponse[] {
+    if (this.showAllBookings) {
+      return this.existingBookings;
+    }
+    return this.existingBookings.slice(0, 1);
   }
 }

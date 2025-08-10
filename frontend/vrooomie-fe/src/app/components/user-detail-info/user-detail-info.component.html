@@ -1,5 +1,4 @@
 <div class="user-detail-container">
-
   <div class="content-wrapper">
     <!-- Sidebar Menu -->
     <div class="sidebar">
@@ -182,8 +181,80 @@
         <div class="section-header">
           <h2><i class="fa-solid fa-car"></i> Xe của tôi</h2>
           <p>Quản lý danh sách xe của bạn</p>
+          <button class="primary-btn add-car-btn">
+            <i class="fa-solid fa-plus"></i>
+            Đăng ký xe mới
+          </button>
         </div>
-        <div class="empty-state">
+
+        <!-- Loading State -->
+        <div *ngIf="carsLoading" class="loading-container">
+          <div class="dots-loader">
+            <span></span><span></span><span></span>
+          </div>
+        </div>
+
+        <!-- Error State -->
+        <div *ngIf="carsError && !carsLoading" class="error-container">
+          <div class="error-message">
+            <i class="fa-solid fa-exclamation-triangle"></i>
+            <h3>Có lỗi xảy ra</h3>
+            <p>{{ carsError }}</p>
+            <button class="primary-btn" (click)="loadUserCars()">Thử lại</button>
+          </div>
+        </div>
+
+        <!-- Cars List -->
+        <div *ngIf="!carsLoading && !carsError && userCars.length > 0" class="cars-list">
+          <div *ngFor="let car of userCars" class="car-item">
+            <div class="car-image">
+              <img [src]="car.imageUrl" [alt]="car.brand + ' ' + car.model" />
+              <div class="car-status" [ngClass]="getStatusClass(car.status)">
+                {{ getStatusText(car.status) }}
+              </div>
+            </div>
+            <div class="car-info">
+              <div class="car-header">
+                <h3 class="car-title">{{ car.brand }} {{ car.model }}</h3>
+                <div class="car-actions">
+                  <button class="action-btn view-btn" (click)="onViewCar(car.id)" title="Xem chi tiết">
+                    <i class="fa-solid fa-eye"></i>
+                  </button>
+                  <button class="action-btn edit-btn" (click)="onEditCar(car.id)" title="Chỉnh sửa">
+                    <i class="fa-solid fa-edit"></i>
+                  </button>
+                  <button class="action-btn delete-btn" (click)="onDeleteCar(car.id)" title="Xóa">
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="car-details">
+                <span class="car-detail-item">
+                  <i class="fa-solid fa-car"></i>
+                  {{ car.type }}
+                </span>
+                <span class="car-detail-item">
+                  <i class="fa-solid fa-location-dot"></i>
+                  {{ car.address }}
+                </span>
+                <span class="car-detail-item">
+                  <i class="fa-solid fa-ticket"></i>
+                  {{ car.licensePlate }}
+                </span>
+              </div>
+              <div class="car-price">
+                <span class="price-amount">{{ formatPrice(car.pricePerDay) }}K</span>
+                <span class="price-unit">/ngày</span>
+              </div>
+              <div class="car-description" *ngIf="car.description">
+                <p>{{ car.description }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty State -->
+        <div *ngIf="!carsLoading && !carsError && userCars.length === 0" class="empty-state">
           <i class="fa-solid fa-car empty-icon"></i>
           <p>Bạn chưa có xe nào</p>
           <p>Đăng ký xe của bạn để bắt đầu cho thuê!</p>

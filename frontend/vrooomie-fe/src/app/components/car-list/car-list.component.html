@@ -19,21 +19,20 @@
                 <div class="car-image-wrapper">
                     <img [src]="car.imageUrl" [alt]="car.brand + ' ' + car.model" />
                     <span class="flash-icon"><i class="fa-solid fa-bolt"></i></span>
+                    <div class="car-tags">
+                        <span class="status-tag" [ngClass]="getStatusClass(car.status)">{{ getStatusText(car.status) }}</span>
+                    </div>
                 </div>
                 <div class="car-info">
-                    <div class="car-tags">
-                        <span class="status-tag" [ngClass]="getStatusClass(car.status)">{{ getStatusText(car.status)
-                            }}</span>
-                    </div>
                     <h3> {{ car.brand }} {{ car.model }} </h3>
                     <div class="car-details">
                         <span><i class="fa-solid fa-car"></i> {{ car.type }}</span>
                     </div>
                     <div class="car-details">
-                        <span><i class="fa-solid fa-location-dot"></i> {{ car.address }}</span>
+                        <span><i class="fa-solid fa-ticket"></i> {{ car.licensePlate }}</span>
                     </div>
                     <div class="car-details">
-                        <span><i class="fa-solid fa-ticket"></i> {{ car.licensePlate }}</span>
+                        <span><i class="fa-solid fa-location-dot"></i> {{ car.address }}</span>
                     </div>
                     <!-- <div class="car-description" *ngIf="car.description">
                         <span>{{ car.description }}</span>

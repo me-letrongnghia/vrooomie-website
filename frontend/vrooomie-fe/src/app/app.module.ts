@@ -19,6 +19,7 @@ import { UserDetailInfoComponent } from './components/user-detail-info/user-deta
 import { LoaderComponent } from './shared/loader/loader.component';
 import { CarDetailComponent } from './components/car-detail/car-detail.component';
 import { AuthInterceptor } from './interceptors/auth.interceptor';
+import { DeliveryAddressModalComponent } from './components/delivery-address-modal/delivery-address-modal.component';
 
 @NgModule({
   declarations: [
@@ -35,7 +36,8 @@ import { AuthInterceptor } from './interceptors/auth.interceptor';
     RegisterComponent,
     UserDetailInfoComponent,
     LoaderComponent,
-    CarDetailComponent
+    CarDetailComponent,
+    DeliveryAddressModalComponent
   ],
   imports: [
     BrowserModule,

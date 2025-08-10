@@ -18,6 +18,11 @@ export class UserDetailInfoComponent implements OnInit, OnDestroy {
   error: string | null = null;
   private authSubscription: Subscription | null = null;
 
+  // User's cars
+  userCars: Car[] = [];
+  carsLoading: boolean = false;
+  carsError: string | null = null;
+
   constructor(
     private authService: AuthService,
     private router: Router,
@@ -89,6 +94,7 @@ export class UserDetailInfoComponent implements OnInit, OnDestroy {
         break;
       case 'my-cars':
         console.log('Navigating to my cars page');
+        this.loadUserCars();
         break;
       case 'my-trips':
         console.log('Navigating to my trips page');
@@ -200,6 +206,80 @@ export class UserDetailInfoComponent implements OnInit, OnDestroy {
 
   onEditDriverLicense() {
     console.log('Edit driver license clicked');
+  }
+
+  loadUserCars(): void {
+    if (!this.userDetail?.id) {
+      this.carsError = 'Không thể tải danh sách xe. Vui lòng thử lại.';
+      return;
+    }
+
+    this.carsLoading = true;
+    this.carsError = null;
+
+    this.carService.getCarsByOwnerId(this.userDetail.id).subscribe({
+      next: (cars) => {
+        this.userCars = cars;
+        this.carsLoading = false;
+        console.log('User cars loaded:', cars);
+      },
+      error: (error) => {
+        console.error('Error loading user cars:', error);
+        this.carsLoading = false;
+        
+        if (error.status === 401) {
+          this.carsError = 'Bạn không có quyền xem danh sách xe này.';
+        } else if (error.status === 500) {
+          this.carsError = 'Lỗi server. Vui lòng thử lại sau.';
+        } else if (error.status === 0) {
+          this.carsError = 'Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.';
+        } else {
+          this.carsError = 'Có lỗi xảy ra khi tải danh sách xe. Vui lòng thử lại sau.';
+        }
+      }
+    });
+  }
+
+  // Format price for car display
+  formatPrice(price: number): string {
+    return new Intl.NumberFormat('vi-VN').format(price);
+  }
+
+  // Get status text for car
+  getStatusText(status: string): string {
+    switch (status) {
+      case 'AVAILABLE': return 'Có sẵn';
+      case 'BOOKED': return 'Đã thuê';
+      case 'UNAVAILABLE': return 'Bảo trì';
+      default: return status;
+    }
+  }
+
+  // Get status class for car
+  getStatusClass(status: string): string {
+    switch (status) {
+      case 'AVAILABLE': return 'status-available';
+      case 'BOOKED': return 'status-rented';
+      case 'UNAVAILABLE': return 'status-maintenance';
+      default: return 'status-unknown';
+    }
+  }
+
+  // Navigate to car detail
+  onViewCar(carId: number): void {
+    this.router.navigate(['/cars', carId]);
+  }
+
+  // Edit car functionality (placeholder)
+  onEditCar(carId: number): void {
+    console.log('Edit car:', carId);
+    // TODO: Navigate to edit car page
+  }
+
+  // Delete car functionality (placeholder)
+  onDeleteCar(carId: number): void {
+    console.log('Delete car:', carId);
+    // TODO: Show confirmation dialog and delete car
   }
 
   onLogout() {

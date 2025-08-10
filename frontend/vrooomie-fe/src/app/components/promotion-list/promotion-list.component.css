@@ -5,13 +5,14 @@
 }
 
 .vrooomie-promotions h2 {
+    color: #000000;
     font-size: 2.5rem;
     font-weight: bold;
     margin-bottom: 8px;
 }
 
 .vrooomie-promotions .promo-subtitle {
-    color: #555;
+    color: #767676;
     font-size: 1.2rem;
     margin-bottom: 32px;
 }
@@ -24,7 +25,7 @@
 }
 
 .promo-card {
-    background: #fff;
+    background: #ffffff;
     border-radius: 18px;
     box-shadow: 0 2px 16px rgba(0, 0, 0, 0.07);
     overflow: hidden;

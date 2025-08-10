@@ -19,7 +19,7 @@
 }
 
 .car-card {
-    background: #fff;
+    background: #ffffff;
     border-radius: 18px;
     box-shadow: 0 2px 16px rgba(0, 0, 0, 0.07);
     overflow: hidden;
@@ -88,67 +88,61 @@
 }
 
 .car-tags {
-    margin-bottom: 6px;
+    position: absolute;
+    top: 16px;
+    right: 16px;
 }
 
 .status-available {
-    background: #d4edda;
-    color: #000000;
+    background: #5fcf86;
+    color: #ffffff;
 }
 
 .status-rented {
     background: #f8d7da;
-    color: #000000;
+    color: #ffffff;
 }
 
 .status-maintenance {
-    background: #fff3cd;
-    color: #000000;
+    background: #ef5350;
+    color: #ffffff;
 }
 
 .status-tag {
     padding: 8px 12px;
     border-radius: 20px;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 600;
-    text-transform: uppercase;
     backdrop-filter: blur(10px);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .car-info h3 {
-    color: #333;
-    font-size: 1.15rem;
+    color: #000000;
+    font-size: 1.3rem;
     font-weight: bold;
     margin: 0 0 4px 0;
 }
 
-.car-details {
-    color: #888;
-    font-size: 1rem;
-    margin-bottom: 2px;
+.car-details i {
+    color: #5fcf86;
 }
 
-.car-location {
-    color: #444;
-    font-size: 1rem;
+.car-details {
+    color: #767676;
+    font-size: 14px;
     margin-bottom: 2px;
 }
 
 .car-rating {
     color: #ffb300;
-    font-size: 1rem;
+    font-size: 14px;
     margin-bottom: 2px;
 }
 
 .car-rating .star {
     color: rgb(255, 198, 52);
-    font-size: 1.1rem;
-}
-
-.car-rating .trips {
-    color: #4caf50;
-    font-weight: 500;
+    font-size: 14px;
 }
 
 .car-price {
@@ -163,20 +157,14 @@
 }
 
 .new-price {
-    color: #4caf50;
+    color: #5fcf86;
     font-weight: bold;
     font-size: 1.2rem;
 }
 
 .per-day {
-    color: #888;
+    color: #767676;
     font-size: 1rem;
-}
-
-.car-hourly {
-    color: #2196f3;
-    font-size: 1rem;
-    margin-top: 2px;
 }
 
 /* Loading, Error, and No Cars States */
@@ -190,7 +178,7 @@
 .dots-loader span {
     width: 10px;
     height: 10px;
-    background: #4caf50;
+    background: #5fcf86;
     border-radius: 50%;
     display: inline-block;
     animation: dots-bounce 0.6s infinite alternate;
@@ -233,8 +221,8 @@
 }
 
 .retry-button {
-    background: #4caf50;
-    color: white;
+    background: #5fcf86;
+    color: #ffffff;
     border: none;
     padding: 12px 24px;
     border-radius: 8px;
@@ -244,7 +232,9 @@
 }
 
 .retry-button:hover {
-    background: #45a049;
+    background: #79d799;
+    box-shadow: 0 8px 24px 12px rgba(0, 0, 0, .08), 0 20px 24px -4px rgba(0, 0, 0, .08);
+    transition: all 0.2s ease;
 }
 
 .no-cars {
@@ -255,15 +245,6 @@
 
 .no-cars p {
     font-size: 1.2rem;
-    color: #666;
+    color: #767676;
     margin: 0;
-}
-
-.car-description {
-    color: #666;
-    font-size: 0.95rem;
-    margin-bottom: 4px;
-    max-height: 40px;
-    overflow: hidden;
-    text-overflow: ellipsis;
 }
