@@ -2,6 +2,7 @@ import { Component, Output, EventEmitter, OnInit, OnDestroy } from '@angular/cor
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { OAuth2Service } from '../../services/oauth2.service';
 
 @Component({
   selector: 'app-login',
@@ -20,7 +21,8 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   constructor(private authService: AuthService,
     private formBuilder: FormBuilder,
-    private router: Router) { }
+    private router: Router,
+    private oauth2Service: OAuth2Service) { }
 
   ngOnInit(): void {
     // Disable body scroll when modal opens
@@ -31,6 +33,14 @@ export class LoginComponent implements OnInit, OnDestroy {
       email: ['', [Validators.required]],
       password: ['', [Validators.required]]
     })
+  }
+
+  loginWithGoogle() {
+    this.oauth2Service.loginWithGoogle();
+  }
+  
+  loginWithFacebook() {
+    this.oauth2Service.loginWithFacebook();
   }
 
   // Getters for form controls

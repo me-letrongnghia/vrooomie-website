@@ -17,8 +17,8 @@ public class JwtUtil {
     @Value("${jwt.secret}")
     private String secretKey;
 
-    private final long EXPIRATION_TIME_ACCESS_TOKEN = 1000 * 60; // 1 minute
-    private final long EXPIRATION_TIME_REFRESH_TOKEN = 1000 * 60 * 60 * 24; // 1 day
+    private final long EXPIRATION_TIME_ACCESS_TOKEN = 1000 * 60 * 15; // 15 minutes
+    private final long EXPIRATION_TIME_REFRESH_TOKEN = 1000 * 60 * 60 * 24 * 7; // 7 days
 
     public String generateAccessToken(User user) {
         return Jwts.builder()

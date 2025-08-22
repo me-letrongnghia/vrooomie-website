@@ -8,6 +8,7 @@ import { LoginComponent } from './components/login/login.component';
 import { RegisterComponent } from './components/register/register.component';
 import { UserDetailInfoComponent } from './components/user-detail-info/user-detail-info.component';
 import { CarDetailComponent } from './components/car-detail/car-detail.component';
+import { AuthCallbackComponent } from './components/auth-callback/auth-callback.component';
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -17,7 +18,8 @@ const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
   { path: 'user-profile', component: UserDetailInfoComponent },
-  { path: 'car/:id', component: CarDetailComponent }
+  { path: 'car/:id', component: CarDetailComponent },
+  { path: 'auth/callback', component: AuthCallbackComponent }
 ];
 
 @NgModule({

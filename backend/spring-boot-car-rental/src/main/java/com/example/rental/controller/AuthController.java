@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import java.util.Map;
 
 @CrossOrigin(origins = "http://localhost:4200")
 @RestController
@@ -43,7 +44,18 @@ public class AuthController {
     }
 
     @GetMapping("/me")
-    public UserDto me(@AuthenticationPrincipal User user) {
-        return UserMapper.toDTO(user);
+    public ResponseEntity<?> me(@AuthenticationPrincipal User user) {
+        System.out.println("AuthController.me() - User from @AuthenticationPrincipal: " + 
+            (user != null ? user.getEmail() + " (ID: " + user.getId() + ")" : "null"));
+        
+        if (user == null) {
+            System.out.println("AuthController.me() - User is null, authentication failed");
+            return ResponseEntity.status(401).body(Map.of(
+                "error", "Authentication failed", 
+                "message", "User not authenticated or token invalid"
+            ));
+        }
+        
+        return ResponseEntity.ok(UserMapper.toDTO(user));
     }
 }

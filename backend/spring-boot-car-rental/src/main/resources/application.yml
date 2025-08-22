@@ -24,6 +24,17 @@ spring:
           auth: ${MAIL_SMTP_AUTH}
           starttls:
             enable: ${MAIL_SMTP_STARTTLS_ENABLE}
+  
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+          facebook:
+            client-id: ${FACEBOOK_CLIENT_ID}
+            client-secret: ${FACEBOOK_CLIENT_SECRET}
 
   cache:
     type: ${CACHE_TYPE}
@@ -33,3 +44,8 @@ spring:
 
 jwt:
   secret: ${JWT_SECRET_KEY}
+
+app:
+  oauth2:
+    authorized-redirect-uris: ${OAUTH2_REDIRECT_URI}
+    default-user-role: ${OAUTH2_DEFAULT_USER_ROLE:RENTER}

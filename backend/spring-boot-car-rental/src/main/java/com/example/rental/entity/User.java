@@ -61,10 +61,18 @@ public class User {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
+    // OAuth2 fields
+    private String provider; // GOOGLE, FACEBOOK, LOCAL
+    private String providerId; // OAuth2 provider user ID
+
     public enum Role {
         RENTER,
         OWNER,
         ADMIN
+    }
+
+    public enum Provider {
+        LOCAL, GOOGLE, FACEBOOK
     }
 }
 

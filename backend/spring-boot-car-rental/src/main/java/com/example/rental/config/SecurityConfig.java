@@ -23,6 +23,8 @@ import java.util.Arrays;
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthFilter;
+    private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
+    private final OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -31,12 +33,22 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/oauth2/**").permitAll() // Allow all OAuth2 endpoints
+                .requestMatchers("/oauth2/authorization/**").permitAll() // Explicitly allow OAuth2 authorization
                 .requestMatchers("/api/cars", "/api/cars/**").permitAll() // Allow public access to car endpoints
                 .requestMatchers("/api/bookings/car/**").permitAll() // Allow public access to view car bookings
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            )
+            .oauth2Login(oauth2 -> oauth2
+                .authorizationEndpoint(authorization -> authorization
+                    .baseUri("/oauth2/authorization"))
+                .redirectionEndpoint(redirection -> redirection
+                    .baseUri("/oauth2/callback/*"))
+                .successHandler(oAuth2AuthenticationSuccessHandler)
+                .failureHandler(oAuth2AuthenticationFailureHandler)
             )
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 

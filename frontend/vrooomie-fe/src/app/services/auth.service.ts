@@ -98,11 +98,20 @@ export class AuthService {
 
         console.log('Checking existing login:', { user, accessToken, refreshToken }); // Debug log
 
-        if (user && accessToken && refreshToken) {
+        // For regular login: require user, accessToken, and refreshToken
+        // For OAuth2 login: user and accessToken are sufficient
+        if (user && accessToken) {
           const parsedUser = JSON.parse(user);
           console.log('Restoring user session:', parsedUser); // Debug log
           this.currentUserSubject.next(parsedUser);
           this.isAuthenticatedSubject.next(true);
+
+          // Log whether this is OAuth2 or regular login
+          if (refreshToken) {
+            console.log('Regular login session restored');
+          } else {
+            console.log('OAuth2 login session restored (no refresh token)');
+          }
         } else {
           console.log('No existing session found'); // Debug log
           // Explicitly set to false if no session found
@@ -188,7 +197,7 @@ export class AuthService {
         })
       );
   }
-  
+
   // Logout method
   logout() {
     console.log('Logging out user'); // Debug log
@@ -218,6 +227,100 @@ export class AuthService {
     }
   }
 
+  // Handle OAuth2 login completion
+  handleOAuth2LoginSuccess(accessToken: string, refreshToken?: string): Observable<any> {
+    console.log('Handling OAuth2 login success with tokens:', { accessToken, refreshToken });
+
+    // Save both tokens SYNCHRONOUSLY to ensure they're available for interceptor
+    if (this.isBrowser()) {
+      localStorage.setItem('accessToken', accessToken);
+      if (refreshToken) {
+        localStorage.setItem('refreshToken', refreshToken);
+      }
+      console.log('Tokens saved to localStorage successfully');
+    }
+
+    // Small delay to ensure localStorage is fully written before API call
+    return new Observable(observer => {
+      setTimeout(() => {
+        // Get user details from backend using the access token
+        // The auth interceptor will automatically add the token to Authorization header
+        this.getUserDetail().subscribe({
+          next: (userResponse: any) => {
+            console.log('OAuth2 user details received from API:', userResponse);
+
+            if (this.isBrowser()) {
+              // Save user info to localStorage
+              localStorage.setItem('currentUser', JSON.stringify(userResponse));
+              
+              // Update authentication state
+              this.currentUserSubject.next(userResponse);
+              this.isAuthenticatedSubject.next(true);
+              this.authLoadingSubject.next(false);
+            }
+            
+            observer.next(userResponse);
+            observer.complete();
+          },
+          error: (error) => {
+            console.error('Error getting OAuth2 user details from API:', error);
+            console.log('Falling back to token-based authentication');
+            
+            // Only proceed if in browser
+            if (this.isBrowser()) {
+              // If getUserDetail fails, try to extract user info from token
+              this.handleOAuth2TokenOnly(accessToken, refreshToken);
+            }
+            
+            observer.next({ message: 'OAuth2 completed via fallback' });
+            observer.complete();
+          }
+        });
+      }, 200); // 200ms delay to ensure localStorage is written
+    });
+  }
+
+  // Fallback method to handle OAuth2 with token only
+  private handleOAuth2TokenOnly(accessToken: string, refreshToken?: string): void {
+    console.log('Handling OAuth2 with token only (fallback)');
+
+    try {
+      // Decode JWT to get basic user info
+      const decoded: any = jwtDecode(accessToken);
+      console.log('Decoded token:', decoded);
+
+      // Create minimal user object from token claims
+      const user = {
+        email: decoded.sub || decoded.email,
+        fullName: decoded.name || decoded.fullName || 'OAuth2 User',
+        // Add other fields as available in your JWT
+      };
+
+      if (this.isBrowser()) {
+        localStorage.setItem('currentUser', JSON.stringify(user));
+        
+        // Save refresh token if provided
+        if (refreshToken) {
+          localStorage.setItem('refreshToken', refreshToken);
+        }
+      }
+
+      // Update authentication state (only in browser)
+      if (this.isBrowser()) {
+        this.currentUserSubject.next(user);
+        this.isAuthenticatedSubject.next(true);
+        this.authLoadingSubject.next(false);
+        console.log('OAuth2 authentication state updated successfully');
+      }
+    } catch (error) {
+      console.error('Error decoding OAuth2 token:', error);
+      // If all else fails, clear auth state
+      if (this.isBrowser()) {
+        this.clearAuthState();
+      }
+    }
+  }
+
   // Get current user
   getCurrentUser() {
     return this.currentUserSubject.value;
@@ -237,4 +340,6 @@ export class AuthService {
   isAuthLoading(): boolean {
     return this.authLoadingSubject.value;
   }
+
+
 }
