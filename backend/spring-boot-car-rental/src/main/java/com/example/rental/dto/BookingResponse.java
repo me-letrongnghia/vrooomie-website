@@ -13,7 +13,7 @@ import java.time.LocalDate;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class BookingDto implements Serializable {
+public class BookingResponse implements Serializable {
     private static final long serialVersionUID = 1L;
     private Long id;
     private Long carId;

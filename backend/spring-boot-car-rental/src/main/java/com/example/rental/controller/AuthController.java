@@ -10,17 +10,19 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
 
 @CrossOrigin(origins = "http://localhost:4200")
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
+@Slf4j
 public class AuthController {
 
     private final IAuthService iAuthService;
 
     @PostMapping("/register")
-    public ResponseEntity<UserDto> register(@RequestBody @Valid RegisterRequest request) {
+    public ResponseEntity<UserResponse> register(@RequestBody @Valid RegisterRequest request) {
         return  ResponseEntity.ok(iAuthService.register(request));
     }
 
@@ -45,17 +47,15 @@ public class AuthController {
 
     @GetMapping("/me")
     public ResponseEntity<?> me(@AuthenticationPrincipal User user) {
-        System.out.println("AuthController.me() - User from @AuthenticationPrincipal: " + 
-            (user != null ? user.getEmail() + " (ID: " + user.getId() + ")" : "null"));
-        
         if (user == null) {
-            System.out.println("AuthController.me() - User is null, authentication failed");
+            log.warn("AuthController.me() - User is null, authentication failed");
             return ResponseEntity.status(401).body(Map.of(
-                "error", "Authentication failed", 
-                "message", "User not authenticated or token invalid"
+                    "error", "Authentication failed",
+                    "message", "User not authenticated or token invalid"
             ));
         }
-        
+
+        log.info("AuthController.me() - Authenticated user: {} (ID: {})", user.getEmail(), user.getId());
         return ResponseEntity.ok(UserMapper.toDTO(user));
     }
 }

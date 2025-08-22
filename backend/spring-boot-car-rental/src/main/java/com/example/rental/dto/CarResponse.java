@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CarDto implements Serializable {
+public class CarResponse implements Serializable {
     private static final long serialVersionUID = 1L;
     private Long id;
     private Long ownerId;

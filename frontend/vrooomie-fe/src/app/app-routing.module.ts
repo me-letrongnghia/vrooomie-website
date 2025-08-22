@@ -15,7 +15,6 @@ const routes: Routes = [
   { path: 'about-us', component: AboutUsComponent },
   { path: 'become-car-owner', component: BecomeCarOwnerComponent},
   { path: 'my-trips', component: MyTripComponent },
-  { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
   { path: 'user-profile', component: UserDetailInfoComponent },
   { path: 'car/:id', component: CarDetailComponent },

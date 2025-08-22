@@ -1,17 +1,26 @@
 package com.example.rental.mapper;
 
-import com.example.rental.dto.UserDto;
+import com.example.rental.dto.UserResponse;
 import com.example.rental.dto.RegisterRequest;
 import com.example.rental.entity.User;
 
 public class UserMapper {
 
-    public static UserDto toDTO(User user) {
-        return UserDto.builder()
+    public static UserResponse toDTO(User user) {
+        return UserResponse.builder()
                 .id(user.getId())
                 .fullName(user.getFullName())
+                .avatarUrl(user.getAvatarUrl())
+                .phoneNumber(user.getPhoneNumber())
+                .address(user.getAddress())
+                .birthDate(user.getBirthDate())
+                .gender(user.getGender())
+                .driverLicense(user.getDriverLicense())
+                .driverLicenseExpiryDate(user.getDriverLicenseExpiryDate())
+                .driverLicenseImage(user.getDriverLicenseImage())
                 .email(user.getEmail())
                 .role(user.getRole().name())
+                .points(user.getPoints())
                 .createdAt(user.getCreatedAt())
                 .build();
     }

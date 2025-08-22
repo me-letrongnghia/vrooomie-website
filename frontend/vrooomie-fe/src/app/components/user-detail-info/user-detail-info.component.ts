@@ -30,7 +30,7 @@ export class UserDetailInfoComponent implements OnInit, OnDestroy {
   ) {}
 
   getAvatarUrl(): string {
-    return this.userDetail?.avatar || this.getDefaultAvatar();
+    return this.userDetail?.avatarUrl || this.getDefaultAvatar();
   }
 
   formatJoinDate(dateString: string | undefined): string {

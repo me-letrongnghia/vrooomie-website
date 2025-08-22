@@ -25,6 +25,8 @@ public class User {
 
     private String fullName;
 
+    private String avatarUrl;
+
     private String phoneNumber;
 
     private String address;
@@ -61,8 +63,11 @@ public class User {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
+    private int points;
+
     // OAuth2 fields
     private String provider; // GOOGLE, FACEBOOK, LOCAL
+    
     private String providerId; // OAuth2 provider user ID
 
     public enum Role {

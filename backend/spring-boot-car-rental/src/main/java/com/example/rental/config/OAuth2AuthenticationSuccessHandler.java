@@ -23,7 +23,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     private final JwtUtil jwtUtil;
     private final IOAuth2UserService oAuth2UserService;
 
-    @Value("${app.oauth2.authorized-redirect-uris:http://localhost:4200/auth/callback}")
+    @Value("${app.oauth2.authorized-redirect-uris}")
     private String redirectUri;
 
     @Override

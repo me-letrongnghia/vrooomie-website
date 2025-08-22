@@ -25,19 +25,16 @@ export class AppComponent implements OnInit{
   ngOnInit() {
     // Subscribe to authentication loading state
     this.authService.authLoading$.subscribe(isLoading => {
-      console.log('Auth loading state changed:', isLoading); // Debug log
       this.isAuthLoading = isLoading;
     });
 
     // Subscribe to authentication state
     this.authService.isAuthenticated$.subscribe(isAuth => {
-      console.log('Authentication state changed:', isAuth); // Debug log
       this.isAuthenticated = isAuth;
     });
 
     // Subscribe to current user
     this.authService.currentUser$.subscribe(user => {
-      console.log('Current user changed:', user); // Debug log
       this.currentUser = user;
     });
   }

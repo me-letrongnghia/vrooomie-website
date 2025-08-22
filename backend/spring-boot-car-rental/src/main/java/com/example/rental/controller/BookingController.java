@@ -1,6 +1,6 @@
 package com.example.rental.controller;
 
-import com.example.rental.dto.BookingDto;
+import com.example.rental.dto.BookingResponse;
 import com.example.rental.dto.BookingRequest;
 import com.example.rental.entity.User;
 import com.example.rental.services.IBookingService;
@@ -40,26 +40,26 @@ public class BookingController {
     }
 
     @GetMapping("/my")
-    public ResponseEntity<List<BookingDto>> getMyBookings(@AuthenticationPrincipal User user) {
+    public ResponseEntity<List<BookingResponse>> getMyBookings(@AuthenticationPrincipal User user) {
         return ResponseEntity.ok(iBookingService.getBookingsByRenter(user));
     }
 
     @GetMapping("/owner/bookings")
     public ResponseEntity<?> getBookingsForOwnedCars(@AuthenticationPrincipal User owner) {
-        List<BookingDto> bookings = iBookingService.getBookingsForOwnedCars(owner);
+        List<BookingResponse> bookings = iBookingService.getBookingsForOwnedCars(owner);
         return ResponseEntity.ok(bookings);
     }
 
     @GetMapping("/owner")
     public ResponseEntity<?> getBookingsForOwner(@AuthenticationPrincipal User owner,
                                                  @RequestParam(required = false) String status) {
-        List<BookingDto> bookings = iBookingService.getBookingsForOwnedCarsByStatus(owner, status);
+        List<BookingResponse> bookings = iBookingService.getBookingsForOwnedCarsByStatus(owner, status);
         return ResponseEntity.ok(bookings);
     }
 
     @GetMapping("/car/{carId}")
-    public ResponseEntity<List<BookingDto>> getBookingsForCar(@PathVariable Long carId) {
-        List<BookingDto> bookings = iBookingService.getBookingsForCar(carId);
+    public ResponseEntity<List<BookingResponse>> getBookingsForCar(@PathVariable Long carId) {
+        List<BookingResponse> bookings = iBookingService.getBookingsForCar(carId);
         return ResponseEntity.ok(bookings);
     }
 }

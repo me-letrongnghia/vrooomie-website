@@ -48,4 +48,11 @@ jwt:
 app:
   oauth2:
     authorized-redirect-uris: ${OAUTH2_REDIRECT_URI}
-    default-user-role: ${OAUTH2_DEFAULT_USER_ROLE:RENTER}
+    default-user-role: ${OAUTH2_DEFAULT_USER_ROLE}
+
+logging:
+  level:
+    root: INFO
+    org.springframework.security: INFO
+    com.example.rental.filter.JwtAuthenticationFilter: DEBUG
+

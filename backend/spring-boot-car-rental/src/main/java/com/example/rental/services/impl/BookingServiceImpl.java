@@ -1,6 +1,6 @@
 package com.example.rental.services.impl;
 
-import com.example.rental.dto.BookingDto;
+import com.example.rental.dto.BookingResponse;
 import com.example.rental.dto.BookingRequest;
 import com.example.rental.entity.Booking;
 import com.example.rental.entity.Car;
@@ -28,7 +28,7 @@ public class BookingServiceImpl implements IBookingService {
     private final IEmailService iEmailService;
 
     @Override
-    public BookingDto createBooking(BookingRequest request, User renter) {
+    public BookingResponse createBooking(BookingRequest request, User renter) {
         Car car = carRepository.findById(request.getCarId())
                 .orElseThrow(() -> new RuntimeException("Car not found"));
 
@@ -126,7 +126,7 @@ public class BookingServiceImpl implements IBookingService {
     }
 
     @Override
-    public List<BookingDto> getBookingsByRenter(User renter) {
+    public List<BookingResponse> getBookingsByRenter(User renter) {
         List<Booking> bookings = bookingRepository.findByRenter(renter);
         return bookings.stream()
                 .map(BookingMapper::toDto)
@@ -134,7 +134,7 @@ public class BookingServiceImpl implements IBookingService {
     }
 
     @Override
-    public List<BookingDto> getBookingsForOwnedCars(User owner) {
+    public List<BookingResponse> getBookingsForOwnedCars(User owner) {
         List<Booking> bookings = bookingRepository.findByCarOwner(owner);
         return bookings.stream()
                 .map(BookingMapper::toDto)
@@ -142,7 +142,7 @@ public class BookingServiceImpl implements IBookingService {
     }
 
     @Override
-    public List<BookingDto> getBookingsForOwnedCarsByStatus(User owner, String status) {
+    public List<BookingResponse> getBookingsForOwnedCarsByStatus(User owner, String status) {
 
         List<Booking> bookings;
 
@@ -164,7 +164,7 @@ public class BookingServiceImpl implements IBookingService {
     }
 
     @Override
-    public List<BookingDto> getBookingsForCar(Long carId) {
+    public List<BookingResponse> getBookingsForCar(Long carId) {
         List<Booking> bookings = bookingRepository.findByCarId(carId);
         return bookings.stream()
                 .map(BookingMapper::toDto)

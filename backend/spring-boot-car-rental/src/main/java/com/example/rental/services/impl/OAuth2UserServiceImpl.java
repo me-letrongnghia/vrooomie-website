@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -32,6 +33,16 @@ public class OAuth2UserServiceImpl implements IOAuth2UserService {
     public User processOAuth2User(OAuth2User oAuth2User, String registrationId) {
         String email = oAuth2User.getAttribute("email");
         String name = oAuth2User.getAttribute("name");
+        String avatarUrl = null;
+        if (registrationId.equals("facebook")) {
+            Map<String, Object> pictureObj = oAuth2User.getAttribute("picture");
+            if (pictureObj != null && pictureObj.get("data") != null) {
+                Map<String, Object> dataObj = (Map<String, Object>) pictureObj.get("data");
+                avatarUrl = (String) dataObj.get("url");
+            }
+        } else if (registrationId.equals("google")) {
+            avatarUrl = oAuth2User.getAttribute("picture");
+        }
         String providerId = oAuth2User.getAttribute("sub") != null ? 
             oAuth2User.getAttribute("sub") : oAuth2User.getAttribute("id");
 
@@ -42,7 +53,8 @@ public class OAuth2UserServiceImpl implements IOAuth2UserService {
         if (existingUser.isPresent()) {
             User user = existingUser.get();
             // Update provider info if user exists
-            if (user.getProvider() == null || "LOCAL".equals(user.getProvider())) {
+            if (user.getAvatarUrl() == null || user.getProvider() == null || "LOCAL".equals(user.getProvider())) {
+                user.setAvatarUrl(avatarUrl);
                 user.setProvider(registrationId.toUpperCase());
                 user.setProviderId(providerId);
                 log.info("Updated existing user {} with OAuth2 provider info", email);
@@ -57,6 +69,7 @@ public class OAuth2UserServiceImpl implements IOAuth2UserService {
             User newUser = User.builder()
                 .email(email)
                 .fullName(name)
+                .avatarUrl(avatarUrl)
                 .provider(registrationId.toUpperCase())
                 .providerId(providerId)
                 .enabled(true) // OAuth users are automatically verified

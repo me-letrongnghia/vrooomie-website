@@ -20,9 +20,7 @@
 
     <!-- Show user profile when authenticated -->
     <div *ngIf="isAuthenticated" class="user-profile" routerLink="/user-profile">
-      <div class="user-avatar">
-        <i class="fa-regular fa-user"></i>
-      </div>
+      <img [src]="currentUser?.avatarUrl" [alt]="currentUser?.avatarUrl" class="user-avatar">
       <span class="user-name">{{ currentUser?.fullName }}</span>
       <i class="fa-solid fa-chevron-down dropdown-arrow"></i>
     </div>

@@ -1,7 +1,7 @@
 package com.example.rental.controller;
 
 import com.example.rental.dto.CarRequest;
-import com.example.rental.dto.CarDto;
+import com.example.rental.dto.CarResponse;
 import com.example.rental.entity.User;
 import com.example.rental.services.ICarService;
 import lombok.RequiredArgsConstructor;
@@ -19,27 +19,27 @@ public class CarController {
     private final ICarService iCarService;
 
     @GetMapping
-    public List<CarDto> getAllCars() {
+    public List<CarResponse> getAllCars() {
         return iCarService.getAllCars();
     }
 
     @GetMapping("/{id}")
-    public CarDto getCarById(@PathVariable Long id) {
+    public CarResponse getCarById(@PathVariable Long id) {
         return iCarService.getCarById(id);
     }
 
     @GetMapping("/owner/{ownerId}")
-    public List<CarDto> getCarsByOwnerId(@PathVariable Long ownerId) {
+    public List<CarResponse> getCarsByOwnerId(@PathVariable Long ownerId) {
         return iCarService.getCarsByOwnerId(ownerId);
     }
 
     @PostMapping("/create")
-    public CarDto createCar(@RequestBody CarRequest request, @AuthenticationPrincipal User owner) {
+    public CarResponse createCar(@RequestBody CarRequest request, @AuthenticationPrincipal User owner) {
         return iCarService.createCar(request, owner);
     }
 
     @PutMapping("/{id}")
-    public CarDto updateCar(@PathVariable Long id, @RequestBody CarDto carDto) {
+    public CarResponse updateCar(@PathVariable Long id, @RequestBody CarResponse carDto) {
         return iCarService.updateCar(id, carDto);
     }
 

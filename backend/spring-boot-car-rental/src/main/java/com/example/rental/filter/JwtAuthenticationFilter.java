@@ -16,7 +16,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.List;
 import io.jsonwebtoken.ExpiredJwtException;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -29,49 +31,42 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
         final String authHeader = request.getHeader("Authorization");
-        System.out.println("JWT Filter - Request URI: " + request.getRequestURI());
-        System.out.println("JWT Filter - Auth Header: " + (authHeader != null ? authHeader.substring(0, Math.min(30, authHeader.length())) + "..." : "null"));
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            System.out.println("JWT Filter - No valid Authorization header, proceeding without authentication");
             filterChain.doFilter(request, response);
             return;
         }
 
         final String token = authHeader.substring(7);
         String email = null;
+
         try {
             email = jwtUtil.extractEmail(token);
-            System.out.println("JWT Filter - Extracted email from token: " + email);
         } catch (ExpiredJwtException e) {
-            System.out.println("JWT Filter - Token expired: " + e.getMessage());
-            // Token hết hạn, cho qua filter chain như anonymous
+            log.debug("Expired JWT: {}", e.getMessage());
             filterChain.doFilter(request, response);
             return;
         } catch (Exception e) {
-            System.out.println("JWT Filter - Invalid token: " + e.getMessage());
-            // Token không hợp lệ, cho qua filter chain như anonymous
+            log.debug("Invalid JWT: {}", e.getMessage());
             filterChain.doFilter(request, response);
             return;
         }
 
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             User user = userRepository.findByEmail(email).orElse(null);
-            System.out.println("JWT Filter - User found in database: " + (user != null ? user.getEmail() + " (ID: " + user.getId() + ")" : "null"));
-
+            
             if (user != null && jwtUtil.isTokenValid(token, user)) {
                 UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(user, null,
-                                List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name())));
+                        new UsernamePasswordAuthenticationToken(
+                                user, null,
+                                List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
+                        );
 
                 SecurityContextHolder.getContext().setAuthentication(authToken);
-                System.out.println("JWT Filter - Authentication set successfully for user: " + user.getEmail());
+                log.debug("JWT authentication success for user: {}", user.getEmail());
             } else {
-                System.out.println("JWT Filter - Authentication failed - user null or token invalid");
+                log.warn("JWT authentication failed for user: {}", email);
             }
-        } else {
-            System.out.println("JWT Filter - Skipping authentication - email: " + email + ", existing auth: " + 
-                (SecurityContextHolder.getContext().getAuthentication() != null));
         }
 
         filterChain.doFilter(request, response);

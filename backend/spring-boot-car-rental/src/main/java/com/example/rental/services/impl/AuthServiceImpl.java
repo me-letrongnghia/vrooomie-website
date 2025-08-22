@@ -22,7 +22,7 @@ public class AuthServiceImpl implements IAuthService {
     private final JwtUtil jwtUtil;
     private final EmailServiceImpl emailServiceImpl;
 
-    public UserDto register(RegisterRequest request) {
+    public UserResponse register(RegisterRequest request) {
 //        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
 //            throw new RuntimeException("Email already exists");
 //        }

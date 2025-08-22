@@ -1,7 +1,7 @@
 package com.example.rental.services.impl;
 
 import com.example.rental.dto.CarRequest;
-import com.example.rental.dto.CarDto;
+import com.example.rental.dto.CarResponse;
 import com.example.rental.entity.Car;
 import com.example.rental.entity.User;
 import com.example.rental.mapper.CarMapper;
@@ -23,7 +23,7 @@ public class CarServiceImpl implements ICarService {
     private final CarRepository carRepository;
 
     @Cacheable(value = "cars")
-    public List<CarDto> getAllCars() {
+    public List<CarResponse> getAllCars() {
         System.out.println("Fetching cars from database...");
         return carRepository.findAll().stream()
                 .map(CarMapper::toDto)
@@ -31,7 +31,7 @@ public class CarServiceImpl implements ICarService {
     }
 
     @Cacheable(value = "cars", key = "#id")
-    public CarDto getCarById(Long id) {
+    public CarResponse getCarById(Long id) {
         System.out.println("Fetching car by id from database...");
         Car car = carRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Car not found"));
@@ -39,14 +39,14 @@ public class CarServiceImpl implements ICarService {
     }
 
     @CacheEvict(value = "cars", allEntries = true)
-    public CarDto createCar(CarRequest request, User owner) {
+    public CarResponse createCar(CarRequest request, User owner) {
         Car car = CarMapper.toEntity(request, owner);
         Car saved = carRepository.save(car);
         return CarMapper.toDto(saved);
     }
 
     @CacheEvict(value = "cars", allEntries = true)
-    public CarDto updateCar(Long id, CarDto carDto) {
+    public CarResponse updateCar(Long id, CarResponse carDto) {
         Car car = carRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Car not found"));
         // Cập nhật các field cần thiết từ DTO
@@ -72,7 +72,7 @@ public class CarServiceImpl implements ICarService {
 
     @Override
     @Cacheable(value = "cars", key = "#ownerId")
-    public List<CarDto> getCarsByOwnerId(Long ownerId) {
+    public List<CarResponse> getCarsByOwnerId(Long ownerId) {
         return carRepository.findByOwnerId(ownerId).stream()
                 .map(CarMapper::toDto)
                 .collect(Collectors.toList());

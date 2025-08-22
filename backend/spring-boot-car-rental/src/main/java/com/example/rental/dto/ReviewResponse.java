@@ -6,17 +6,17 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserDto implements Serializable {
+public class ReviewResponse implements Serializable {
     private static final long serialVersionUID = 1L;
     private Long id;
-    private String fullName;
-    private String email;
-    private String role;
-    private LocalDateTime createdAt;
+    private Long carId;
+    private Long renterId;
+    private int rating;
+    private String comment;
 }
+

@@ -1,13 +1,16 @@
 export interface User {
   id: number;
   fullName: string;
-  email: string;
-  phone: string;
+  avatarUrl: string;
+  phoneNumber: string;
   address: string;
-  avatar: string;
-  role: string;
-  points: number;
   birthDate: string;
   gender: string;
+  driverLicense: string;
+  driverLicenseExpiryDate: string;
+  driverLicenseImage: string;
+  email: string;
+  role: string;
+  points: number;
   createdAt: string;
 }

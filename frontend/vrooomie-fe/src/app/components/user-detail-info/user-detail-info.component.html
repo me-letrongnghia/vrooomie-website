@@ -85,7 +85,7 @@
         <!-- User Profile Section -->
         <div *ngIf="userDetail && !loading && !error && !isAuthLoading" class="user-profile">
           <div class="avatar-section">
-            <img [src]="getAvatarUrl()" [alt]="userDetail?.avatar" class="user-avatar">
+            <img [src]="getAvatarUrl()" [alt]="userDetail?.avatarUrl" class="user-avatar">
             <div class="user-basic-info">
               <h2 class="user-name">{{ userDetail?.fullName }}</h2>
               <p class="join-date">Tham gia: {{ formatJoinDate(userDetail?.createdAt) }}</p>
@@ -112,8 +112,8 @@
           <div class="info-row">
             <span class="info-label">Số điện thoại</span>
             <div class="info-value-with-action">
-              <span class="verification-badge verified">Chưa xác thực</span>
-              <span class="info-value">{{ userDetail?.phone }}</span>
+              <span *ngIf="!userDetail?.phoneNumber" class="verification-badge unverified">Chưa xác thực</span>
+              <span class="info-value">{{ userDetail?.phoneNumber }}</span>
               <button class="edit-btn small" (click)="onEditPhone()">✏️</button>
             </div>
           </div>

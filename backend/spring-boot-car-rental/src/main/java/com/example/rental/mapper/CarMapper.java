@@ -1,14 +1,14 @@
 package com.example.rental.mapper;
 
 import com.example.rental.dto.CarRequest;
-import com.example.rental.dto.CarDto;
+import com.example.rental.dto.CarResponse;
 import com.example.rental.entity.Car;
 import com.example.rental.entity.User;
 
 public class CarMapper {
 
-    public static CarDto toDto(Car car) {
-        return CarDto.builder()
+    public static CarResponse toDto(Car car) {
+        return CarResponse.builder()
                 .id(car.getId())
                 .ownerId(car.getOwner().getId())
                 .brand(car.getBrand())

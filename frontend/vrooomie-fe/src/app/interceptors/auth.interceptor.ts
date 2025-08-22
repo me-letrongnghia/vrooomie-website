@@ -45,19 +45,15 @@ export class AuthInterceptor implements HttpInterceptor {
       const refreshToken = this.authService.getRefreshToken();
       if (!refreshToken) {
         this.isRefreshing = false;
-        
         // Don't logout if this is an OAuth2 flow (auth/me call)
         // Let the calling component handle the error instead
         if (request.url.includes('/auth/me')) {
-          console.log('Auth Interceptor - OAuth2 auth/me call failed, not logging out');
           return throwError(() => new Error('No refresh token available for OAuth2 flow'));
         }
-        
         // Only logout for regular authenticated requests
         this.authService.logout();
         return throwError(() => new Error('No refresh token available'));
       }
-
       return this.authService.refreshAccessToken(refreshToken).pipe(
         switchMap((response: any) => {
           this.isRefreshing = false;

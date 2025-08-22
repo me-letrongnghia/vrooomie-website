@@ -1,6 +1,6 @@
 package com.example.rental.mapper;
 
-import com.example.rental.dto.BookingDto;
+import com.example.rental.dto.BookingResponse;
 import com.example.rental.dto.BookingRequest;
 import com.example.rental.entity.Booking;
 import com.example.rental.entity.Car;
@@ -10,8 +10,8 @@ import java.math.BigDecimal;
 
 public class BookingMapper {
 
-    public static BookingDto toDto(Booking booking) {
-        return BookingDto.builder()
+    public static BookingResponse toDto(Booking booking) {
+        return BookingResponse.builder()
                 .id(booking.getId())
                 .carId(booking.getCar().getId())
                 .carBrand(booking.getCar().getBrand())
