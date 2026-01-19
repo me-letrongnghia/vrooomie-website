@@ -25,6 +25,7 @@ public class User {
 
     private String fullName;
 
+    @Column(length = 1000)
     private String avatarUrl;
 
     private String phoneNumber;

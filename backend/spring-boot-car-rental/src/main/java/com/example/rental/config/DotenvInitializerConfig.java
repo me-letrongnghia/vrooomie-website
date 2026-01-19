@@ -9,13 +9,18 @@ public class DotenvInitializerConfig {
     @PostConstruct
     public void init() {
         Dotenv dotenv = Dotenv.configure()
-                              .filename("local.env")
+                              .directory("./backend/spring-boot-car-rental/")
+                              .filename("local-car-rental.env")
                               .ignoreIfMissing()
                               .load();
+        
+        System.out.println("=== Loading Environment Variables ===");
         dotenv.entries().forEach(entry -> {
-            if (System.getProperty(entry.getKey()) == null) {
-                System.setProperty(entry.getKey(), entry.getValue());
-            }
+            System.setProperty(entry.getKey(), entry.getValue());
+            System.out.println("Loaded: " + entry.getKey() + " = " + 
+                (entry.getKey().contains("PASSWORD") || entry.getKey().contains("SECRET") 
+                    ? "***" : entry.getValue()));
         });
+        System.out.println("=== Environment Variables Loaded ===");
     }
 }
