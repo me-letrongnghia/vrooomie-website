@@ -1,0 +1,75 @@
+version: "3.8"
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: vrooomie-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: car_rental
+      MYSQL_USER: rental_user
+      MYSQL_PASSWORD: rental_password
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - vrooomie-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: vrooomie-redis
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    networks:
+      - vrooomie-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend/spring-boot-car-rental
+    container_name: vrooomie-backend
+    restart: unless-stopped
+    env_file:
+      - ./backend/spring-boot-car-rental/local-car-rental.env
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: car_rental
+      DB_USERNAME: rental_user
+      DB_PASSWORD: rental_password
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - vrooomie-network
+
+  frontend:
+    build:
+      context: ./frontend/vrooomie-fe
+    container_name: vrooomie-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    networks:
+      - vrooomie-network
+
+volumes:
+  mysql_data:
+  redis_data:
+
+networks:
+  vrooomie-network:
+    driver: bridge
