@@ -41,9 +41,19 @@ spring:
 
   cache:
     type: ${CACHE_TYPE}
-  redis:
-    host: ${REDIS_HOST}
-    port: ${REDIS_PORT}
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      timeout: 60000
+      connect-timeout: 10000
+      client-type: lettuce
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: -1ms
 
 jwt:
   secret: ${JWT_SECRET_KEY}
