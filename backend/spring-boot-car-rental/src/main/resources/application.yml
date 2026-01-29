@@ -62,6 +62,7 @@ app:
   oauth2:
     authorized-redirect-uris: ${OAUTH2_REDIRECT_URI}
     default-user-role: ${OAUTH2_DEFAULT_USER_ROLE}
+  backend-url: ${BACKEND_URL}
 
 cors:
   allowed-origins: ${FRONTEND_URL}

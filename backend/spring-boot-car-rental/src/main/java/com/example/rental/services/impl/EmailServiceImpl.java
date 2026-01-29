@@ -6,6 +6,7 @@ import com.example.rental.services.IEmailService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -18,6 +19,9 @@ import java.util.Random;
 public class EmailServiceImpl implements IEmailService {
 
     private final JavaMailSender mailSender;
+    
+    @Value("${app.backend-url}")
+    private String backendUrl;
 
     public String generateOtpCode() {
         Random random = new Random();
@@ -26,7 +30,7 @@ public class EmailServiceImpl implements IEmailService {
     }
 
     public void sendVerificationEmail(String toEmail, String code) {
-        String verifyUrl = "http://localhost:8080/api/auth/verify?email=" + toEmail + "&code=" + code;
+        String verifyUrl = backendUrl + "/api/auth/verify?email=" + toEmail + "&code=" + code;
 
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(toEmail);
