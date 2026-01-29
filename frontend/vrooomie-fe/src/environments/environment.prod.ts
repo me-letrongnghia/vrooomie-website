@@ -4,6 +4,6 @@ export const environment = {
     // Use relative URLs - nginx will proxy to backend
     // This works for both local Docker and VPS deployment
     baseUrl: '/api',
-    frontendUrl: window.location.origin,
+    frontendUrl: '',
     oauth2Url: '/oauth2/authorization'
 };
