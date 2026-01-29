@@ -18,8 +18,8 @@ RUN npm run build
 # Stage 2: Runtime stage with Nginx
 FROM nginx:alpine
 
-# Copy custom nginx configuration (optional)
-# COPY nginx.conf /etc/nginx/nginx.conf
+# Copy custom nginx configuration
+COPY nginx.conf /etc/nginx/nginx.conf
 
 # Copy built application from build stage
 COPY --from=build /app/dist/vrooomie-fe/browser /usr/share/nginx/html

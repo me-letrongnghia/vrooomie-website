@@ -6,10 +6,10 @@ services:
     container_name: vrooomie-mysql
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: car_rental
-      MYSQL_USER: rental_user
-      MYSQL_PASSWORD: rental_password
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
     volumes:
       - mysql_data:/var/lib/mysql
     networks:
@@ -37,17 +37,37 @@ services:
       context: ./backend/spring-boot-car-rental
     container_name: vrooomie-backend
     restart: unless-stopped
-    env_file:
-      - ./backend/spring-boot-car-rental/local-car-rental.env
+    ports:
+      - "${BACKEND_PORT:-8080}:8080"
     environment:
-      SPRING_PROFILES_ACTIVE: prod
-      DB_HOST: mysql
-      DB_PORT: 3306
-      DB_NAME: car_rental
-      DB_USERNAME: rental_user
-      DB_PASSWORD: rental_password
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
+      # Database
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_NAME: ${DB_NAME}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      # Redis
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+      CACHE_TYPE: ${CACHE_TYPE}
+      # JWT
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      # OAuth2
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      FACEBOOK_CLIENT_ID: ${FACEBOOK_CLIENT_ID}
+      FACEBOOK_CLIENT_SECRET: ${FACEBOOK_CLIENT_SECRET}
+      OAUTH2_DEFAULT_USER_ROLE: ${OAUTH2_DEFAULT_USER_ROLE}
+      OAUTH2_REDIRECT_URI: ${APP_PROTOCOL}://${APP_DOMAIN}:${FRONTEND_PORT}/auth/callback
+      # Email
+      MAIL_HOST: ${MAIL_HOST}
+      MAIL_PORT: ${MAIL_PORT}
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      MAIL_SMTP_AUTH: ${MAIL_SMTP_AUTH}
+      MAIL_SMTP_STARTTLS_ENABLE: ${MAIL_SMTP_STARTTLS_ENABLE}
+      # CORS
+      FRONTEND_URL: ${APP_PROTOCOL}://${APP_DOMAIN}:${FRONTEND_PORT}
     depends_on:
       mysql:
         condition: service_healthy
@@ -55,14 +75,26 @@ services:
         condition: service_healthy
     networks:
       - vrooomie-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health", "||", "exit", "1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
 
   frontend:
     build:
       context: ./frontend/vrooomie-fe
+      args:
+        API_URL: ${APP_PROTOCOL}://${APP_DOMAIN}:${BACKEND_PORT}
     container_name: vrooomie-frontend
     restart: unless-stopped
     ports:
-      - "80:80"
+      - "${FRONTEND_PORT:-80}:80"
+    environment:
+      BACKEND_URL: http://backend:8080
+    depends_on:
+      - backend
     networks:
       - vrooomie-network
 

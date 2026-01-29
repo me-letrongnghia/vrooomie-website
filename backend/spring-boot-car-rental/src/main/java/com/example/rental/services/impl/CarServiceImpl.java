@@ -22,7 +22,7 @@ public class CarServiceImpl implements ICarService {
 
     private final CarRepository carRepository;
 
-    @Cacheable(value = "cars")
+    @Cacheable(value = "allCars")
     public List<CarResponse> getAllCars() {
         System.out.println("Fetching cars from database...");
         return carRepository.findAll().stream()
@@ -30,7 +30,7 @@ public class CarServiceImpl implements ICarService {
                 .collect(Collectors.toList());
     }
 
-    @Cacheable(value = "cars", key = "#id")
+    @Cacheable(value = "carById", key = "#id")
     public CarResponse getCarById(Long id) {
         System.out.println("Fetching car by id from database...");
         Car car = carRepository.findById(id)
@@ -38,14 +38,14 @@ public class CarServiceImpl implements ICarService {
         return CarMapper.toDto(car);
     }
 
-    @CacheEvict(value = "cars", allEntries = true)
+    @CacheEvict(value = {"allCars", "carById", "carsByOwner"}, allEntries = true)
     public CarResponse createCar(CarRequest request, User owner) {
         Car car = CarMapper.toEntity(request, owner);
         Car saved = carRepository.save(car);
         return CarMapper.toDto(saved);
     }
 
-    @CacheEvict(value = "cars", allEntries = true)
+    @CacheEvict(value = {"allCars", "carById", "carsByOwner"}, allEntries = true)
     public CarResponse updateCar(Long id, CarResponse carDto) {
         Car car = carRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Car not found"));
@@ -62,7 +62,7 @@ public class CarServiceImpl implements ICarService {
         return CarMapper.toDto(carRepository.save(car));
     }
 
-    @CacheEvict(value = "cars", allEntries = true)
+    @CacheEvict(value = {"allCars", "carById", "carsByOwner"}, allEntries = true)
     public void deleteCar(Long id) {
         if (!carRepository.existsById(id)) {
             throw new RuntimeException("Car not found");
@@ -71,8 +71,9 @@ public class CarServiceImpl implements ICarService {
     }
 
     @Override
-    @Cacheable(value = "cars", key = "#ownerId")
+    @Cacheable(value = "carsByOwner", key = "#ownerId")
     public List<CarResponse> getCarsByOwnerId(Long ownerId) {
+        System.out.println("Fetching cars by owner from database...");
         return carRepository.findByOwnerId(ownerId).stream()
                 .map(CarMapper::toDto)
                 .collect(Collectors.toList());

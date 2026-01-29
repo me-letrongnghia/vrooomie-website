@@ -53,6 +53,9 @@ app:
     authorized-redirect-uris: ${OAUTH2_REDIRECT_URI}
     default-user-role: ${OAUTH2_DEFAULT_USER_ROLE}
 
+cors:
+  allowed-origins: ${FRONTEND_URL}
+
 logging:
   level:
     root: INFO
