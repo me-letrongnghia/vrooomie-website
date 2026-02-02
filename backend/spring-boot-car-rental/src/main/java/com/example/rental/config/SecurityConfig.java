@@ -42,6 +42,8 @@ public class SecurityConfig {
                 .requestMatchers("/oauth2/authorization/**").permitAll() // Explicitly allow OAuth2 authorization
                 .requestMatchers("/api/cars", "/api/cars/**").permitAll() // Allow public access to car endpoints
                 .requestMatchers("/api/bookings/car/**").permitAll() // Allow public access to view car bookings
+                .requestMatchers("/api/files/**").permitAll() // Allow public access to view uploaded files
+                .requestMatchers("/api/provinces", "/api/districts", "/api/wards").permitAll() // Allow public access to address data
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session

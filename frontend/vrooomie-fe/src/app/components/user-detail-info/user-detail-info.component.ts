@@ -1,10 +1,12 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
-import { CarService } from '../../services/car.service';
+import { CarService, CarCreateRequest } from '../../services/car.service';
 import { Car } from '../../models/car.interface';
 import { User } from '../../models/user.interface';
 import { Subscription } from 'rxjs';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FileUploadService } from '../../services/file-upload.service';
 
 @Component({
   selector: 'app-user-detail-info',
@@ -23,11 +25,39 @@ export class UserDetailInfoComponent implements OnInit, OnDestroy {
   carsLoading: boolean = false;
   carsError: string | null = null;
 
+  // Create car modal
+  showCreateCarModal: boolean = false;
+  createCarForm: FormGroup;
+  carCreating: boolean = false;
+  carCreateError: string | null = null;
+  carCreateSuccess: boolean = false;
+
+  // File upload
+  selectedFile: File | null = null;
+  imagePreview: string | null = null;
+  uploadMode: 'url' | 'upload' = 'url';
+  fileUploading: boolean = false;
+  uploadProgress: number = 0;
+
   constructor(
     private authService: AuthService,
     private router: Router,
-    private carService: CarService
-  ) {}
+    private carService: CarService,
+    private fb: FormBuilder,
+    private fileUploadService: FileUploadService
+  ) {
+    // Initialize create car form
+    this.createCarForm = this.fb.group({
+      brand: ['', [Validators.required, Validators.minLength(2)]],
+      model: ['', [Validators.required, Validators.minLength(1)]],
+      licensePlate: ['', [Validators.required, Validators.pattern(/^[0-9]{2}[A-Z]{1,2}-[0-9]{4,5}$/)]],
+      type: ['', Validators.required],
+      pricePerDay: ['', [Validators.required, Validators.min(100000)]],
+      imageUrl: [''],
+      address: ['', [Validators.required, Validators.minLength(10)]],
+      description: ['', [Validators.required, Validators.minLength(20), Validators.maxLength(2000)]]
+    });
+  }
 
   getAvatarUrl(): string {
     return this.userDetail?.avatarUrl || this.getDefaultAvatar();
@@ -290,5 +320,215 @@ export class UserDetailInfoComponent implements OnInit, OnDestroy {
     this.router.navigate(['/']);
     
     console.log('Logout successful, navigated to home page');
+  }
+
+  // Create car methods
+  onOpenCreateCarModal(): void {
+    this.showCreateCarModal = true;
+    this.carCreateError = null;
+    this.carCreateSuccess = false;
+    this.createCarForm.reset();
+    this.selectedFile = null;
+    this.imagePreview = null;
+    this.uploadMode = 'url';
+    this.fileUploading = false;
+    this.uploadProgress = 0;
+  }
+
+  onCloseCreateCarModal(): void {
+    this.showCreateCarModal = false;
+    this.carCreateError = null;
+    this.carCreateSuccess = false;
+    this.createCarForm.reset();
+    this.selectedFile = null;
+    this.imagePreview = null;
+    this.uploadMode = 'url';
+    this.fileUploading = false;
+    this.uploadProgress = 0;
+  }
+
+  onSubmitCreateCar(): void {
+    if (this.createCarForm.invalid) {
+      Object.keys(this.createCarForm.controls).forEach(key => {
+        this.createCarForm.get(key)?.markAsTouched();
+      });
+      return;
+    }
+
+    // Check authentication
+    if (!this.authService.isAuthenticated()) {
+      this.carCreateError = 'Bạn cần đăng nhập để thực hiện chức năng này.';
+      return;
+    }
+
+    // Validate image (either URL or file upload)
+    if (this.uploadMode === 'url') {
+      if (!this.createCarForm.value.imageUrl) {
+        this.carCreateError = 'Vui lòng nhập URL hình ảnh';
+        return;
+      }
+    } else {
+      if (!this.selectedFile) {
+        this.carCreateError = 'Vui lòng chọn hình ảnh';
+        return;
+      }
+    }
+
+    this.carCreating = true;
+    this.carCreateError = null;
+    this.carCreateSuccess = false;
+
+    // If upload mode, upload file first
+    if (this.uploadMode === 'upload' && this.selectedFile) {
+      this.fileUploading = true;
+      this.fileUploadService.uploadFile(this.selectedFile).subscribe({
+        next: (response) => {
+          this.fileUploading = false;
+          // Set the uploaded image URL
+          this.createCarForm.patchValue({ imageUrl: response.fileUrl });
+          // Now create the car
+          this.createCarWithData();
+        },
+        error: (error) => {
+          console.error('Error uploading file:', error);
+          this.fileUploading = false;
+          this.carCreating = false;
+          
+          // Better error handling
+          if (error.status === 401 || error.status === 403) {
+            this.carCreateError = 'Bạn cần đăng nhập để tải hình ảnh lên. Vui lòng đăng nhập lại.';
+            // Clear auth and show login
+            setTimeout(() => {
+              this.authService.clearAuthState();
+              this.router.navigate(['/']);
+            }, 2000);
+          } else if (error.status === 413) {
+            this.carCreateError = 'File quá lớn. Vui lòng chọn file nhỏ hơn 10MB.';
+          } else if (error.status === 415) {
+            this.carCreateError = 'Định dạng file không được hỗ trợ. Chỉ chấp nhận JPG, PNG, GIF.';
+          } else if (error.status === 0) {
+            this.carCreateError = 'Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.';
+          } else {
+            const errorMsg = error.error?.error || error.error?.message || 'Không thể tải hình ảnh lên';
+            this.carCreateError = `Lỗi: ${errorMsg}. Vui lòng thử lại.`;
+          }
+        }
+      });
+    } else {
+      // URL mode, create car directly
+      this.createCarWithData();
+    }
+  }
+
+  private createCarWithData(): void {
+    const carData: CarCreateRequest = {
+      brand: this.createCarForm.value.brand,
+      model: this.createCarForm.value.model,
+      licensePlate: this.createCarForm.value.licensePlate,
+      type: this.createCarForm.value.type,
+      pricePerDay: parseFloat(this.createCarForm.value.pricePerDay),
+      imageUrl: this.createCarForm.value.imageUrl,
+      address: this.createCarForm.value.address,
+      description: this.createCarForm.value.description
+    };
+
+    this.carService.createCar(carData).subscribe({
+      next: (car) => {
+        console.log('Car created successfully:', car);
+        this.carCreating = false;
+        this.carCreateSuccess = true;
+        
+        // Wait 1.5 seconds to show success message, then close modal and reload cars
+        setTimeout(() => {
+          this.onCloseCreateCarModal();
+          this.loadUserCars();
+        }, 1500);
+      },
+      error: (error) => {
+        console.error('Error creating car:', error);
+        this.carCreating = false;
+        
+        if (error.status === 401) {
+          this.carCreateError = 'Bạn không có quyền tạo xe. Vui lòng đăng nhập lại.';
+        } else if (error.status === 400) {
+          this.carCreateError = error.error?.message || 'Dữ liệu không hợp lệ. Vui lòng kiểm tra lại.';
+        } else if (error.status === 500) {
+          this.carCreateError = 'Lỗi server. Vui lòng thử lại sau.';
+        } else if (error.status === 0) {
+          this.carCreateError = 'Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.';
+        } else {
+          this.carCreateError = 'Có lỗi xảy ra khi tạo xe. Vui lòng thử lại sau.';
+        }
+      }
+    });
+  }
+
+  // Form validation helper
+  isFieldInvalid(fieldName: string): boolean {
+    const field = this.createCarForm.get(fieldName);
+    return !!(field && field.invalid && field.touched);
+  }
+
+  getFieldError(fieldName: string): string {
+    const field = this.createCarForm.get(fieldName);
+    if (!field || !field.errors || !field.touched) return '';
+
+    if (field.errors['required']) return 'Trường này là bắt buộc';
+    if (field.errors['minlength']) return `Tối thiểu ${field.errors['minlength'].requiredLength} ký tự`;
+    if (field.errors['maxlength']) return `Tối đa ${field.errors['maxlength'].requiredLength} ký tự`;
+    if (field.errors['pattern']) {
+      if (fieldName === 'licensePlate') return 'Biển số không hợp lệ (VD: 30A-12345)';
+      if (fieldName === 'imageUrl') return 'URL hình ảnh không hợp lệ';
+    }
+    if (field.errors['min']) return `Giá trị tối thiểu là ${field.errors['min'].min}`;
+    
+    return 'Giá trị không hợp lệ';
+  }
+
+  // File upload methods
+  switchUploadMode(mode: 'url' | 'upload'): void {
+    this.uploadMode = mode;
+    this.selectedFile = null;
+    this.imagePreview = null;
+    this.createCarForm.patchValue({ imageUrl: '' });
+  }
+
+  onFileSelected(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      // Validate file type
+      const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+      if (!validTypes.includes(file.type)) {
+        this.carCreateError = 'Chỉ chấp nhận file ảnh (JPG, PNG, GIF)';
+        return;
+      }
+
+      // Validate file size (max 10MB)
+      const maxSize = 10 * 1024 * 1024; // 10MB
+      if (file.size > maxSize) {
+        this.carCreateError = 'Kích thước file tối đa là 10MB';
+        return;
+      }
+
+      this.selectedFile = file;
+      this.carCreateError = null;
+
+      // Create image preview
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.imagePreview = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  removeSelectedFile(): void {
+    this.selectedFile = null;
+    this.imagePreview = null;
+    // Reset file input
+    const fileInput = document.getElementById('fileInput') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
   }
 }

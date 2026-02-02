@@ -181,7 +181,7 @@
         <div class="section-header">
           <h2><i class="fa-solid fa-car"></i> Xe của tôi</h2>
           <p>Quản lý danh sách xe của bạn</p>
-          <button class="primary-btn add-car-btn">
+          <button class="primary-btn add-car-btn" (click)="onOpenCreateCarModal()">
             <i class="fa-solid fa-plus"></i>
             Đăng ký xe mới
           </button>
@@ -258,7 +258,7 @@
           <i class="fa-solid fa-car empty-icon"></i>
           <p>Bạn chưa có xe nào</p>
           <p>Đăng ký xe của bạn để bắt đầu cho thuê!</p>
-          <button class="primary-btn">Đăng ký xe</button>
+          <button class="primary-btn" (click)="onOpenCreateCarModal()">Đăng ký xe</button>
         </div>
       </div>
 
@@ -368,5 +368,242 @@
       </div>
 
     </div>
+  </div>
+</div>
+
+<!-- Create Car Modal -->
+<div class="create-car-modal" *ngIf="showCreateCarModal" (click)="onCloseCreateCarModal()">
+  <div class="create-car-form" (click)="$event.stopPropagation()">
+    <button class="close-button" (click)="onCloseCreateCarModal()">✕</button>
+    <h2><i class="fa-solid fa-car"></i> Đăng ký xe mới</h2>
+    <p class="modal-subtitle">Điền thông tin xe của bạn để bắt đầu cho thuê</p>
+
+    <form [formGroup]="createCarForm" (ngSubmit)="onSubmitCreateCar()">
+      <div class="form-row">
+        <div class="form-group half-width">
+          <label for="brand">Hãng xe <span class="required">*</span></label>
+          <input 
+            type="text" 
+            id="brand" 
+            formControlName="brand" 
+            placeholder="VD: Toyota, Honda, Mercedes"
+            [class.error]="isFieldInvalid('brand')"
+          />
+          <span class="error-message" *ngIf="isFieldInvalid('brand')">
+            {{ getFieldError('brand') }}
+          </span>
+        </div>
+
+        <div class="form-group half-width">
+          <label for="model">Dòng xe <span class="required">*</span></label>
+          <input 
+            type="text" 
+            id="model" 
+            formControlName="model" 
+            placeholder="VD: Vios, City, C-Class"
+            [class.error]="isFieldInvalid('model')"
+          />
+          <span class="error-message" *ngIf="isFieldInvalid('model')">
+            {{ getFieldError('model') }}
+          </span>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group half-width">
+          <label for="licensePlate">Biển số xe <span class="required">*</span></label>
+          <input 
+            type="text" 
+            id="licensePlate" 
+            formControlName="licensePlate" 
+            placeholder="VD: 30A-12345"
+            [class.error]="isFieldInvalid('licensePlate')"
+          />
+          <span class="error-message" *ngIf="isFieldInvalid('licensePlate')">
+            {{ getFieldError('licensePlate') }}
+          </span>
+        </div>
+
+        <div class="form-group half-width">
+          <label for="type">Loại xe <span class="required">*</span></label>
+          <select 
+            id="type" 
+            formControlName="type"
+            [class.error]="isFieldInvalid('type')"
+          >
+            <option value="" disabled>Chọn loại xe</option>
+            <option value="Sedan">Sedan</option>
+            <option value="SUV">SUV</option>
+            <option value="Hatchback">Hatchback</option>
+            <option value="Pickup">Pickup</option>
+            <option value="MPV">MPV (7 chỗ)</option>
+            <option value="Coupe">Coupe</option>
+            <option value="Convertible">Convertible</option>
+            <option value="Van">Van</option>
+          </select>
+          <span class="error-message" *ngIf="isFieldInvalid('type')">
+            {{ getFieldError('type') }}
+          </span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="pricePerDay">Giá thuê mỗi ngày (VNĐ) <span class="required">*</span></label>
+        <input 
+          type="number" 
+          id="pricePerDay" 
+          formControlName="pricePerDay" 
+          placeholder="VD: 500000"
+          [class.error]="isFieldInvalid('pricePerDay')"
+          min="100000"
+          step="10000"
+        />
+        <span class="error-message" *ngIf="isFieldInvalid('pricePerDay')">
+          {{ getFieldError('pricePerDay') }}
+        </span>
+        <span class="form-hint">Giá tối thiểu: 100,000 VNĐ/ngày</span>
+      </div>
+
+      <div class="form-group">
+        <label>Hình ảnh xe <span class="required">*</span></label>
+        
+        <!-- Upload Mode Toggle -->
+        <div class="upload-mode-toggle">
+          <button 
+            type="button" 
+            class="toggle-btn" 
+            [class.active]="uploadMode === 'url'"
+            (click)="switchUploadMode('url')"
+          >
+            <i class="fa-solid fa-link"></i>
+            Nhập URL
+          </button>
+          <button 
+            type="button" 
+            class="toggle-btn" 
+            [class.active]="uploadMode === 'upload'"
+            (click)="switchUploadMode('upload')"
+          >
+            <i class="fa-solid fa-upload"></i>
+            Tải lên từ máy
+          </button>
+        </div>
+
+        <!-- URL Input Mode -->
+        <div *ngIf="uploadMode === 'url'" class="url-input-container">
+          <input 
+            type="url" 
+            id="imageUrl" 
+            formControlName="imageUrl" 
+            placeholder="https://example.com/image.jpg"
+            [class.error]="isFieldInvalid('imageUrl')"
+          />
+          <span class="error-message" *ngIf="isFieldInvalid('imageUrl')">
+            {{ getFieldError('imageUrl') }}
+          </span>
+          <span class="form-hint">Nhập URL trực tiếp từ internet</span>
+        </div>
+
+        <!-- File Upload Mode -->
+        <div *ngIf="uploadMode === 'upload'" class="file-upload-container">
+          <div class="file-input-wrapper" *ngIf="!imagePreview">
+            <input 
+              type="file" 
+              id="fileInput"
+              accept="image/jpeg,image/jpg,image/png,image/gif"
+              (change)="onFileSelected($event)"
+              hidden
+            />
+            <label for="fileInput" class="file-input-label">
+              <i class="fa-solid fa-cloud-arrow-up"></i>
+              <span>Click để chọn hình ảnh</span>
+              <span class="file-hint">hoặc kéo thả file vào đây</span>
+            </label>
+          </div>
+
+          <!-- Image Preview -->
+          <div class="image-preview-container" *ngIf="imagePreview">
+            <img [src]="imagePreview" alt="Preview" class="image-preview" />
+            <div class="preview-overlay">
+              <button type="button" class="remove-image-btn" (click)="removeSelectedFile()">
+                <i class="fa-solid fa-trash"></i>
+                Xóa ảnh
+              </button>
+            </div>
+            <div class="file-info" *ngIf="selectedFile">
+              <span class="file-name">{{ selectedFile.name }}</span>
+              <span class="file-size">{{ (selectedFile.size / 1024 / 1024).toFixed(2) }} MB</span>
+            </div>
+          </div>
+
+          <span class="form-hint">Chấp nhận JPG, PNG, GIF. Tối đa 10MB</span>
+        </div>
+
+        <!-- Upload Progress -->
+        <div class="upload-progress" *ngIf="fileUploading">
+          <div class="progress-bar">
+            <div class="progress-fill" [style.width.%]="uploadProgress"></div>
+          </div>
+          <span class="progress-text">Đang tải lên... {{ uploadProgress }}%</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="address">Địa chỉ nhận xe <span class="required">*</span></label>
+        <input 
+          type="text" 
+          id="address" 
+          formControlName="address" 
+          placeholder="VD: 123 Nguyễn Huệ, Quận 1, TP.HCM"
+          [class.error]="isFieldInvalid('address')"
+        />
+        <span class="error-message" *ngIf="isFieldInvalid('address')">
+          {{ getFieldError('address') }}
+        </span>
+      </div>
+
+      <div class="form-group">
+        <label for="description">Mô tả xe <span class="required">*</span></label>
+        <textarea 
+          id="description" 
+          formControlName="description" 
+          placeholder="Mô tả chi tiết về xe: Tình trạng, tính năng, tiện nghi..."
+          rows="4"
+          [class.error]="isFieldInvalid('description')"
+        ></textarea>
+        <span class="error-message" *ngIf="isFieldInvalid('description')">
+          {{ getFieldError('description') }}
+        </span>
+        <span class="form-hint">Tối thiểu 20 ký tự, tối đa 2000 ký tự</span>
+      </div>
+
+      <!-- Error Message -->
+      <div class="alert alert-error" *ngIf="carCreateError">
+        <i class="fa-solid fa-exclamation-circle"></i>
+        {{ carCreateError }}
+      </div>
+
+      <!-- Success Message -->
+      <div class="alert alert-success" *ngIf="carCreateSuccess">
+        <i class="fa-solid fa-check-circle"></i>
+        Tạo xe thành công! Đang tải lại danh sách...
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="secondary-btn" (click)="onCloseCreateCarModal()" [disabled]="carCreating">
+          Hủy
+        </button>
+        <button type="submit" class="primary-btn" [disabled]="carCreating || createCarForm.invalid">
+          <span *ngIf="!carCreating">
+            <i class="fa-solid fa-plus"></i>
+            Tạo xe
+          </span>
+          <span *ngIf="carCreating">
+            <i class="fa-solid fa-spinner fa-spin"></i>
+            Đang tạo...
+          </span>
+        </button>
+      </div>
+    </form>
   </div>
 </div>
