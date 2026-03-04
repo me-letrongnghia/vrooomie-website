@@ -1,9 +1,5 @@
-// Google Maps Configuration
+// OpenStreetMap Configuration (FREE - No API Key Required!)
 export const MAPS_CONFIG = {
-  // Replace with your actual Google Maps API key
-  // Get one from: https://developers.google.com/maps/gmp-get-started
-  API_KEY: 'YOUR_GOOGLE_MAPS_API_KEY',
-  
   // Default coordinates for Ho Chi Minh City center
   DEFAULT_COORDS: {
     lat: 10.8231,
@@ -17,47 +13,31 @@ export const MAPS_CONFIG = {
   
   // Map configuration
   DEFAULT_ZOOM: 13,
-  MAP_OPTIONS: {
-    mapTypeControl: false,
-    streetViewControl: false,
-    fullscreenControl: false,
-    zoomControl: true,
-    scrollWheel: true
+  MAX_ZOOM: 18,
+  
+  // OpenStreetMap tile layer
+  TILE_LAYER: {
+    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    maxZoom: 19
+  },
+
+  // Nominatim API for geocoding (FREE)
+  NOMINATIM_API: 'https://nominatim.openstreetmap.org',
+  
+  // Custom marker icons
+  MARKERS: {
+    CAR: {
+      iconUrl: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2RjMzU0NSIgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIj48cGF0aCBkPSJNMTIgMkM4LjEzIDIgNSA1LjEzIDUgOWMwIDUuMjUgNyAxMyA3IDEzczctNy43NSA3LTEzYzAtMy44Ny0zLjEzLTctNy03em0wIDkuNWMtMS4zOCAwLTIuNS0xLjEyLTIuNS0yLjVzMS4xMi0yLjUgMi41LTIuNSAyLjUgMS4xMiAyLjUgMi41LTEuMTIgMi41LTIuNSAyLjV6Ii8+PC9zdmc+',
+      iconSize: [32, 32],
+      iconAnchor: [16, 32],
+      popupAnchor: [0, -32]
+    },
+    DELIVERY: {
+      iconUrl: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzVmY2Y4NiIgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIj48cGF0aCBkPSJNMTIgMkM4LjEzIDIgNSA1LjEzIDUgOWMwIDUuMjUgNyAxMyA3IDEzczctNy43NSA3LTEzYzAtMy44Ny0zLjEzLTctNy03em0wIDkuNWMtMS4zOCAwLTIuNS0xLjEyLTIuNS0yLjVzMS4xMi0yLjUgMi41LTIuNSAyLjUgMS4xMiAyLjUgMi41LTEuMTIgMi41LTIuNSAyLjV6Ii8+PC9zdmc+',
+      iconSize: [32, 32],
+      iconAnchor: [16, 32],
+      popupAnchor: [0, -32]
+    }
   }
 };
-
-// Helper function to load Google Maps API
-export function loadGoogleMapsAPI(): Promise<void> {
-  return new Promise((resolve, reject) => {
-    // Check if Google Maps is already loaded
-    if (typeof (window as any).google !== 'undefined' && (window as any).google.maps) {
-      resolve();
-      return;
-    }
-
-    // Check if script is already being loaded
-    if (document.querySelector('script[src*="maps.googleapis.com"]')) {
-      // Wait for the existing script to load
-      const checkGoogleMaps = () => {
-        if (typeof (window as any).google !== 'undefined' && (window as any).google.maps) {
-          resolve();
-        } else {
-          setTimeout(checkGoogleMaps, 100);
-        }
-      };
-      checkGoogleMaps();
-      return;
-    }
-
-    // Create and load Google Maps script
-    const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${MAPS_CONFIG.API_KEY}&libraries=places`;
-    script.async = true;
-    script.defer = true;
-
-    script.onload = () => resolve();
-    script.onerror = () => reject(new Error('Failed to load Google Maps API'));
-
-    document.head.appendChild(script);
-  });
-}

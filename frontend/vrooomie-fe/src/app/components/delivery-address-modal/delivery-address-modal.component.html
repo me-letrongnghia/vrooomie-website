@@ -13,13 +13,13 @@
             <p>Đang tải bản đồ...</p>
           </div>
           
-          <!-- Simple map implementation using Google Maps API -->
-          <div id="delivery-map" class="delivery-map" *ngIf="mapLoaded"></div>
+          <!-- OpenStreetMap with Leaflet (FREE!) -->
+          <div id="delivery-map" class="delivery-map"></div>
           
           <!-- Delivery radius indicator -->
-          <div class="radius-info">
+          <div class="radius-info" *ngIf="mapLoaded">
             <i class="fas fa-info-circle"></i>
-            <span>Giao xe trong bán kính 10km</span>
+            <span>Giao xe trong bán kính {{MAX_DELIVERY_DISTANCE}}km - Sử dụng OpenStreetMap (FREE)</span>
           </div>
         </div>
       </div>
@@ -53,7 +53,7 @@
               (click)="selectSuggestion(suggestion)"
             >
               <i class="fas fa-map-marker-alt"></i>
-              <span>{{ suggestion.description }}</span>
+              <span>{{ suggestion.display_name }}</span>
             </div>
           </div>
 

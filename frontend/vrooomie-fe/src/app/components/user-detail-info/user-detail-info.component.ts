@@ -1,12 +1,15 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
 import { CarService, CarCreateRequest } from '../../services/car.service';
+import { BookingService, BookingResponse } from '../../services/booking.service';
 import { Car } from '../../models/car.interface';
 import { User } from '../../models/user.interface';
 import { Subscription } from 'rxjs';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { FileUploadService } from '../../services/file-upload.service';
+import * as L from 'leaflet';
+import { MAPS_CONFIG } from '../delivery-address-modal/maps.config';
 
 @Component({
   selector: 'app-user-detail-info',
@@ -25,6 +28,11 @@ export class UserDetailInfoComponent implements OnInit, OnDestroy {
   carsLoading: boolean = false;
   carsError: string | null = null;
 
+  // User's bookings
+  userBookings: BookingResponse[] = [];
+  bookingsLoading: boolean = false;
+  bookingsError: string | null = null;
+
   // Create car modal
   showCreateCarModal: boolean = false;
   createCarForm: FormGroup;
@@ -39,10 +47,15 @@ export class UserDetailInfoComponent implements OnInit, OnDestroy {
   fileUploading: boolean = false;
   uploadProgress: number = 0;
 
+  // Location picker map
+  private locationPickerMap: L.Map | null = null;
+  private locationMarker: L.Marker | null = null;
+
   constructor(
     private authService: AuthService,
     private router: Router,
     private carService: CarService,
+    private bookingService: BookingService,
     private fb: FormBuilder,
     private fileUploadService: FileUploadService
   ) {
@@ -55,7 +68,9 @@ export class UserDetailInfoComponent implements OnInit, OnDestroy {
       pricePerDay: ['', [Validators.required, Validators.min(100000)]],
       imageUrl: [''],
       address: ['', [Validators.required, Validators.minLength(10)]],
-      description: ['', [Validators.required, Validators.minLength(20), Validators.maxLength(2000)]]
+      description: ['', [Validators.required, Validators.minLength(20), Validators.maxLength(2000)]],
+      latitude: [''],
+      longitude: ['']
     });
   }
 
@@ -128,6 +143,7 @@ export class UserDetailInfoComponent implements OnInit, OnDestroy {
         break;
       case 'my-trips':
         console.log('Navigating to my trips page');
+        this.loadUserBookings();
         break;
       case 'long-term-rental':
         console.log('Navigating to long term rental page');
@@ -173,6 +189,92 @@ export class UserDetailInfoComponent implements OnInit, OnDestroy {
     if (this.authSubscription) {
       this.authSubscription.unsubscribe();
     }
+
+    // Clean up map if exists
+    if (this.locationPickerMap) {
+      this.locationPickerMap.remove();
+    }
+  }
+
+  // Location Picker Map Methods
+  private initializeLocationPickerMap(): void {
+    const mapElement = document.getElementById('createCarMap');
+    if (!mapElement) return;
+
+    // Default center: Ho Chi Minh City
+    const defaultLat = 10.8231;
+    const defaultLng = 106.6297;
+
+    try {
+      // Initialize map
+      this.locationPickerMap = L.map('createCarMap', {
+        center: [defaultLat, defaultLng],
+        zoom: 13,
+        zoomControl: true
+      });
+
+      // Add tile layer
+      L.tileLayer(MAPS_CONFIG.TILE_LAYER.url, {
+        attribution: MAPS_CONFIG.TILE_LAYER.attribution,
+        maxZoom: 19
+      }).addTo(this.locationPickerMap);
+
+      // Create custom icon
+      const customIcon = L.icon({
+        iconUrl: MAPS_CONFIG.MARKERS.CAR.iconUrl,
+        iconSize: MAPS_CONFIG.MARKERS.CAR.iconSize as [number, number],
+        iconAnchor: MAPS_CONFIG.MARKERS.CAR.iconAnchor as [number, number],
+        popupAnchor: MAPS_CONFIG.MARKERS.CAR.popupAnchor as [number, number]
+      });
+
+      // Handle map click to place marker
+      this.locationPickerMap.on('click', (e: L.LeafletMouseEvent) => {
+        const { lat, lng } = e.latlng;
+
+        // Remove existing marker
+        if (this.locationMarker) {
+          this.locationMarker.remove();
+        }
+
+        // Place new marker
+        this.locationMarker = L.marker([lat, lng], { icon: customIcon })
+          .addTo(this.locationPickerMap!)
+          .bindPopup('Vị trí xe của bạn')
+          .openPopup();
+
+        // Update form values
+        this.createCarForm.patchValue({
+          latitude: lat,
+          longitude: lng
+        });
+
+        console.log('Location selected:', lat, lng);
+      });
+
+      // Fix map display issues
+      setTimeout(() => {
+        this.locationPickerMap?.invalidateSize();
+      }, 100);
+
+    } catch (error) {
+      console.error('Error initializing location picker map:', error);
+    }
+  }
+
+  clearLocation(): void {
+    // Remove marker
+    if (this.locationMarker) {
+      this.locationMarker.remove();
+      this.locationMarker = null;
+    }
+
+    // Clear form values
+    this.createCarForm.patchValue({
+      latitude: null,
+      longitude: null
+    });
+
+    console.log('Location cleared');
   }
 
   loadUserDetail(): void {
@@ -270,6 +372,33 @@ export class UserDetailInfoComponent implements OnInit, OnDestroy {
     });
   }
 
+  loadUserBookings(): void {
+    this.bookingsLoading = true;
+    this.bookingsError = null;
+
+    this.bookingService.getMyBookings().subscribe({
+      next: (bookings) => {
+        this.userBookings = bookings;
+        this.bookingsLoading = false;
+        console.log('User bookings loaded:', bookings);
+      },
+      error: (error) => {
+        console.error('Error loading user bookings:', error);
+        this.bookingsLoading = false;
+        
+        if (error.status === 401) {
+          this.bookingsError = 'Bạn không có quyền xem danh sách chuyến đi này.';
+        } else if (error.status === 500) {
+          this.bookingsError = 'Lỗi server. Vui lòng thử lại sau.';
+        } else if (error.status === 0) {
+          this.bookingsError = 'Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.';
+        } else {
+          this.bookingsError = 'Có lỗi xảy ra khi tải danh sách chuyến đi. Vui lòng thử lại sau.';
+        }
+      }
+    });
+  }
+
   // Format price for car display
   formatPrice(price: number): string {
     return new Intl.NumberFormat('vi-VN').format(price);
@@ -312,6 +441,68 @@ export class UserDetailInfoComponent implements OnInit, OnDestroy {
     // TODO: Show confirmation dialog and delete car
   }
 
+  // Booking display methods
+  getBookingStatusText(status: string): string {
+    switch (status) {
+      case 'PENDING': return 'Chờ xác nhận';
+      case 'CONFIRMED': return 'Đã xác nhận';
+      case 'COMPLETED': return 'Hoàn thành';
+      case 'CANCELLED': return 'Đã hủy';
+      default: return status;
+    }
+  }
+
+  getBookingStatusClass(status: string): string {
+    switch (status) {
+      case 'PENDING': return 'booking-status-pending';
+      case 'CONFIRMED': return 'booking-status-confirmed';
+      case 'COMPLETED': return 'booking-status-completed';
+      case 'CANCELLED': return 'booking-status-cancelled';
+      default: return 'booking-status-unknown';
+    }
+  }
+
+  getPaymentStatusText(status: string): string {
+    switch (status) {
+      case 'PENDING': return 'Chờ thanh toán';
+      case 'PAID': return 'Đã thanh toán';
+      case 'FAILED': return 'Thanh toán thất bại';
+      case 'REFUNDED': return 'Đã hoàn tiền';
+      default: return status;
+    }
+  }
+
+  getPaymentStatusClass(status: string): string {
+    switch (status) {
+      case 'PENDING': return 'payment-status-pending';
+      case 'PAID': return 'payment-status-paid';
+      case 'FAILED': return 'payment-status-failed';
+      case 'REFUNDED': return 'payment-status-refunded';
+      default: return 'payment-status-unknown';
+    }
+  }
+
+  formatBookingDate(dateString: string): string {
+    if (!dateString) return '--/--/----';
+    
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('vi-VN', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      });
+    } catch {
+      return '--/--/----';
+    }
+  }
+
+  // Navigate to booking detail (placeholder)
+  onViewBooking(bookingId: number): void {
+    console.log('View booking:', bookingId);
+    // TODO: Navigate to booking detail page or show modal
+  }
+
   onLogout() {
     // Call logout method from AuthService
     this.authService.logout();
@@ -333,6 +524,11 @@ export class UserDetailInfoComponent implements OnInit, OnDestroy {
     this.uploadMode = 'url';
     this.fileUploading = false;
     this.uploadProgress = 0;
+
+    // Initialize location picker map after modal DOM is ready
+    setTimeout(() => {
+      this.initializeLocationPickerMap();
+    }, 100);
   }
 
   onCloseCreateCarModal(): void {
@@ -345,6 +541,13 @@ export class UserDetailInfoComponent implements OnInit, OnDestroy {
     this.uploadMode = 'url';
     this.fileUploading = false;
     this.uploadProgress = 0;
+
+    // Clean up map
+    if (this.locationPickerMap) {
+      this.locationPickerMap.remove();
+      this.locationPickerMap = null;
+      this.locationMarker = null;
+    }
   }
 
   onSubmitCreateCar(): void {
@@ -429,7 +632,9 @@ export class UserDetailInfoComponent implements OnInit, OnDestroy {
       pricePerDay: parseFloat(this.createCarForm.value.pricePerDay),
       imageUrl: this.createCarForm.value.imageUrl,
       address: this.createCarForm.value.address,
-      description: this.createCarForm.value.description
+      description: this.createCarForm.value.description,
+      latitude: this.createCarForm.value.latitude || null,
+      longitude: this.createCarForm.value.longitude || null
     };
 
     this.carService.createCar(carData).subscribe({

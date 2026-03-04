@@ -9,6 +9,8 @@ import { RegisterComponent } from './components/register/register.component';
 import { UserDetailInfoComponent } from './components/user-detail-info/user-detail-info.component';
 import { CarDetailComponent } from './components/car-detail/car-detail.component';
 import { AuthCallbackComponent } from './components/auth-callback/auth-callback.component';
+import { PaymentSuccessComponent } from './components/payment-success/payment-success.component';
+import { PaymentCancelComponent } from './components/payment-cancel/payment-cancel.component';
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -18,7 +20,9 @@ const routes: Routes = [
   { path: 'register', component: RegisterComponent },
   { path: 'user-profile', component: UserDetailInfoComponent },
   { path: 'car/:id', component: CarDetailComponent },
-  { path: 'auth/callback', component: AuthCallbackComponent }
+  { path: 'auth/callback', component: AuthCallbackComponent },
+  { path: 'payment/success', component: PaymentSuccessComponent },
+  { path: 'payment/cancel', component: PaymentCancelComponent }
 ];
 
 @NgModule({

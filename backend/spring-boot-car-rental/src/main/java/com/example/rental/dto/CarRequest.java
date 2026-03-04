@@ -17,5 +17,7 @@ public class CarRequest {
     private BigDecimal pricePerDay;
     private String imageUrl;
     private String address;
+    private Double latitude;
+    private Double longitude;
     private String description;
 }

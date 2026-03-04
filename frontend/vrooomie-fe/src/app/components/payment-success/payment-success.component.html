@@ -1,0 +1,58 @@
+<div class="payment-result-container">
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-section">
+    <div class="dots-loader">
+      <span></span><span></span><span></span>
+    </div>
+    <p>Đang xác minh thanh toán...</p>
+  </div>
+
+  <!-- Success State -->
+  <div *ngIf="!loading && paymentVerified" class="success-section">
+    <div class="success-icon">
+      <i class="fa-solid fa-circle-check"></i>
+    </div>
+    <h1>Thanh toán thành công!</h1>
+    <p class="success-message">
+      Đơn đặt xe của bạn đã được xác nhận. Chúng tôi đã gửi thông tin chi tiết đến email của bạn.
+    </p>
+    
+    <div class="payment-info">
+      <div class="info-row" *ngIf="orderCode">
+        <span class="label">Mã thanh toán:</span>
+        <span class="value">{{ orderCode }}</span>
+      </div>
+      <div class="info-row" *ngIf="bookingId">
+        <span class="label">Mã đơn đặt:</span>
+        <span class="value">#{{ bookingId }}</span>
+      </div>
+    </div>
+
+    <div class="action-buttons">
+      <button class="primary-btn" (click)="goToMyTrips()">
+        <i class="fa-solid fa-list"></i>
+        Xem chuyến đi của tôi
+      </button>
+      <button class="secondary-btn" (click)="goHome()">
+        <i class="fa-solid fa-house"></i>
+        Về trang chủ
+      </button>
+    </div>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="!loading && error" class="error-section">
+    <div class="error-icon">
+      <i class="fa-solid fa-circle-xmark"></i>
+    </div>
+    <h1>Có lỗi xảy ra</h1>
+    <p class="error-message">{{ error }}</p>
+    
+    <div class="action-buttons">
+      <button class="primary-btn" (click)="goHome()">
+        <i class="fa-solid fa-house"></i>
+        Về trang chủ
+      </button>
+    </div>
+  </div>
+</div>

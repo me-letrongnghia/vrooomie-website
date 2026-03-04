@@ -1,18 +1,13 @@
-import { Component, Output, EventEmitter, OnInit, OnDestroy, Input, ViewChild, ElementRef } from '@angular/core';
+import { Component, Output, EventEmitter, OnInit, OnDestroy, Input, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MAPS_CONFIG, loadGoogleMapsAPI } from './maps.config';
-
-declare var google: any;
+import { MAPS_CONFIG } from './maps.config';
+import * as L from 'leaflet';
 
 interface AddressSuggestion {
   place_id: string;
-  description: string;
-  geometry?: {
-    location: {
-      lat: number;
-      lng: number;
-    };
-  };
+  display_name: string;
+  lat: string;
+  lon: string;
 }
 
 export interface DeliveryInfo {
@@ -34,27 +29,28 @@ export interface DeliveryInfo {
   templateUrl: './delivery-address-modal.component.html',
   styleUrl: './delivery-address-modal.component.css'
 })
-export class DeliveryAddressModalComponent implements OnInit, OnDestroy {
+export class DeliveryAddressModalComponent implements OnInit, OnDestroy, AfterViewInit {
   @Output() close = new EventEmitter<void>();
   @Output() deliveryConfirmed = new EventEmitter<DeliveryInfo>();
   @Input() carAddress: string = '';
+  @Input() carLatitude?: number;
+  @Input() carLongitude?: number;
   @ViewChild('mapContainer', { static: false }) mapContainer!: ElementRef;
   @ViewChild('addressInput', { static: false }) addressInput!: ElementRef;
 
   deliveryForm: FormGroup = new FormGroup<any>({});
   
-  // Map related
-  map: any;
+  // Map related (Leaflet)
+  map: L.Map | null = null;
   mapLoaded = false;
-  carMarker: any;
-  deliveryMarker: any;
-  radiusCircle: any;
+  carMarker: L.Marker | null = null;
+  deliveryMarker: L.Marker | null = null;
+  radiusCircle: L.Circle | null = null;
   carCoordinates = MAPS_CONFIG.DEFAULT_COORDS;
   
   // Address suggestions
-  autocompleteService: any;
-  placesService: any;
   addressSuggestions: AddressSuggestion[] = [];
+  searchTimeout: any;
   
   // Calculation
   calculating = false;
@@ -63,6 +59,7 @@ export class DeliveryAddressModalComponent implements OnInit, OnDestroy {
   selectedAddress = '';
   calculatedDistance = 0;
   deliveryFee = 0;
+  selectedCoordinates = { lat: 0, lng: 0 };
   
   // Constants
   readonly MAX_DELIVERY_DISTANCE = MAPS_CONFIG.MAX_DELIVERY_DISTANCE;
@@ -82,17 +79,31 @@ export class DeliveryAddressModalComponent implements OnInit, OnDestroy {
       contactPhone: ['', [Validators.required, Validators.pattern(/^[0-9]{10,11}$/)]],
       notes: ['']
     });
-    
-    // Load Google Maps
-    this.loadGoogleMaps();
-    
-    // Parse car address to get coordinates if possible
-    this.geocodeCarAddress();
+  }
+
+  ngAfterViewInit(): void {
+    // Geocode car address first, then initialize map
+    this.geocodeCarAddress().then(() => {
+      // Initialize map after geocoding completes
+      setTimeout(() => {
+        this.initializeMap();
+      }, 100);
+    });
   }
 
   ngOnDestroy(): void {
     // Re-enable body scroll when modal closes
     document.body.style.overflow = 'auto';
+    
+    // Clean up map
+    if (this.map) {
+      this.map.remove();
+      this.map = null;
+    }
+    
+    if (this.searchTimeout) {
+      clearTimeout(this.searchTimeout);
+    }
   }
 
   // Getters for form controls
@@ -101,69 +112,128 @@ export class DeliveryAddressModalComponent implements OnInit, OnDestroy {
   get contactPhone() { return this.deliveryForm.get('contactPhone'); }
   get notes() { return this.deliveryForm.get('notes'); }
 
-  loadGoogleMaps(): void {
-    loadGoogleMapsAPI()
-      .then(() => {
-        this.initializeMap();
-      })
-      .catch((error) => {
-        console.error('Failed to load Google Maps:', error);
-        this.deliveryError = 'Không thể tải bản đồ. Vui lòng thử lại sau.';
-      });
-  }
-
   initializeMap(): void {
-    setTimeout(() => {
-      if (this.mapContainer && this.mapContainer.nativeElement) {
-        this.map = new google.maps.Map(this.mapContainer.nativeElement.querySelector('#delivery-map'), {
-          center: this.carCoordinates,
-          zoom: MAPS_CONFIG.DEFAULT_ZOOM,
-          ...MAPS_CONFIG.MAP_OPTIONS
-        });
+    if (!this.mapContainer?.nativeElement) {
+      console.error('Map container not found');
+      return;
+    }
 
-        // Initialize services
-        this.autocompleteService = new google.maps.places.AutocompleteService();
-        this.placesService = new google.maps.places.PlacesService(this.map);
+    const mapElement = this.mapContainer.nativeElement.querySelector('#delivery-map');
+    if (!mapElement) {
+      console.error('Map element not found');
+      return;
+    }
 
-        // Add car marker
-        this.carMarker = new google.maps.Marker({
-          position: this.carCoordinates,
-          map: this.map,
-          title: 'Vị trí xe',
-          icon: {
-            url: 'data:image/svg+xml;base64,' + btoa(`
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#dc3545" width="32" height="32">
-                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-              </svg>
-            `),
-            scaledSize: new google.maps.Size(32, 32),
-            anchor: new google.maps.Point(16, 32)
-          }
-        });
+    try {
+      // Create Leaflet map
+      this.map = L.map(mapElement, {
+        center: [this.carCoordinates.lat, this.carCoordinates.lng],
+        zoom: MAPS_CONFIG.DEFAULT_ZOOM,
+        zoomControl: true,
+        scrollWheelZoom: true
+      });
 
-        // Add delivery radius circle
-        this.radiusCircle = new google.maps.Circle({
-          map: this.map,
-          center: this.carCoordinates,
+      // Add OpenStreetMap tile layer
+      L.tileLayer(MAPS_CONFIG.TILE_LAYER.url, {
+        attribution: MAPS_CONFIG.TILE_LAYER.attribution,
+        maxZoom: MAPS_CONFIG.TILE_LAYER.maxZoom
+      }).addTo(this.map);
+
+      // Create custom icons
+      const carIcon = L.icon({
+        iconUrl: MAPS_CONFIG.MARKERS.CAR.iconUrl,
+        iconSize: MAPS_CONFIG.MARKERS.CAR.iconSize as [number, number],
+        iconAnchor: MAPS_CONFIG.MARKERS.CAR.iconAnchor as [number, number],
+        popupAnchor: MAPS_CONFIG.MARKERS.CAR.popupAnchor as [number, number]
+      });
+
+      // Add car marker
+      this.carMarker = L.marker(
+        [this.carCoordinates.lat, this.carCoordinates.lng],
+        { icon: carIcon }
+      ).addTo(this.map);
+      
+      // Show car address in popup (or default text)
+      const carPopupText = this.carAddress ? `Vị trí xe: ${this.carAddress}` : 'Vị trí xe';
+      this.carMarker.bindPopup(carPopupText);
+
+      // Add delivery radius circle
+      this.radiusCircle = L.circle(
+        [this.carCoordinates.lat, this.carCoordinates.lng],
+        {
           radius: this.MAX_DELIVERY_DISTANCE * 1000, // Convert km to meters
+          color: '#5fcf86',
           fillColor: '#5fcf86',
           fillOpacity: 0.1,
-          strokeColor: '#5fcf86',
-          strokeOpacity: 0.3,
-          strokeWeight: 2
-        });
+          weight: 2,
+          opacity: 0.3
+        }
+      ).addTo(this.map);
 
-        this.mapLoaded = true;
-      }
-    }, 100);
+      this.mapLoaded = true;
+      
+      // Fix map tiles display after a short delay
+      setTimeout(() => {
+        if (this.map) {
+          this.map.invalidateSize();
+        }
+      }, 200);
+      
+      console.log('Map initialized successfully');
+    } catch (error) {
+      console.error('Error initializing map:', error);
+      this.deliveryError = 'Không thể khởi tạo bản đồ';
+    }
   }
 
-  geocodeCarAddress(): void {
-    if (!this.carAddress) return;
-    
-    // This is a simple implementation. In production, you'd use Google Geocoding API
-    // For now, we'll use default coordinates
-    this.carCoordinates = MAPS_CONFIG.DEFAULT_COORDS;
+  geocodeCarAddress(): Promise<void> {
+    return new Promise((resolve) => {
+      // If coordinates are provided directly, use them (most accurate!)
+      if (this.carLatitude && this.carLongitude) {
+        this.carCoordinates = {
+          lat: this.carLatitude,
+          lng: this.carLongitude
+        };
+        console.log('Using provided car coordinates:', this.carCoordinates);
+        resolve();
+        return;
+      }
+
+      // Otherwise, try to geocode address
+      if (!this.carAddress) {
+        console.log('No car address provided, using default coordinates');
+        resolve();
+        return;
+      }
+      
+      // Use Nominatim API to geocode car address
+      const searchQuery = encodeURIComponent(this.carAddress + ', Vietnam');
+      console.log('Geocoding car address:', this.carAddress);
+      
+      fetch(`${MAPS_CONFIG.NOMINATIM_API}/search?format=json&q=${searchQuery}&limit=1`, {
+        headers: {
+          'User-Agent': 'Vrooomie Car Rental App'
+        }
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data && data.length > 0) {
+            this.carCoordinates = {
+              lat: parseFloat(data[0].lat),
+              lng: parseFloat(data[0].lon)
+            };
+            console.log('Car coordinates found:', this.carCoordinates);
+          } else {
+            console.log('No coordinates found for address, using default');
+          }
+          resolve();
+        })
+        .catch(error => {
+          console.error('Error geocoding car address:', error);
+          // Use default coordinates
+          resolve();
+        });
+    });
   }
 
   onAddressChange(event: any): void {
@@ -176,81 +246,77 @@ export class DeliveryAddressModalComponent implements OnInit, OnDestroy {
     // Clear previous error
     this.deliveryError = null;
 
-    // Get address suggestions
-    if (this.autocompleteService) {
-      this.autocompleteService.getPlacePredictions(
-        {
-          input: query,
-          componentRestrictions: { country: 'vn' }, // Restrict to Vietnam
-          types: ['address']
-        },
-        (predictions: any[], status: any) => {
-          if (status === google.maps.places.PlacesServiceStatus.OK && predictions) {
-            this.addressSuggestions = predictions.slice(0, 5).map(prediction => ({
-              place_id: prediction.place_id,
-              description: prediction.description
-            }));
-          } else {
-            this.addressSuggestions = [];
-          }
-        }
-      );
+    // Debounce search
+    if (this.searchTimeout) {
+      clearTimeout(this.searchTimeout);
     }
+
+    this.searchTimeout = setTimeout(() => {
+      this.searchAddress(query);
+    }, 500);
+  }
+
+  searchAddress(query: string): void {
+    // Use Nominatim API for address suggestions
+    const searchQuery = encodeURIComponent(query + ', Vietnam');
+    fetch(`${MAPS_CONFIG.NOMINATIM_API}/search?format=json&q=${searchQuery}&limit=5&addressdetails=1`, {
+      headers: {
+        'User-Agent': 'Vrooomie Car Rental App'
+      }
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data && data.length > 0) {
+          this.addressSuggestions = data.map((item: any) => ({
+            place_id: item.place_id,
+            display_name: item.display_name,
+            lat: item.lat,
+            lon: item.lon
+          }));
+        } else {
+          this.addressSuggestions = [];
+        }
+      })
+      .catch(error => {
+        console.error('Error searching address:', error);
+        this.addressSuggestions = [];
+      });
   }
 
   selectSuggestion(suggestion: AddressSuggestion): void {
     this.deliveryForm.patchValue({
-      address: suggestion.description
+      address: suggestion.display_name
     });
     this.addressSuggestions = [];
 
-    // Get detailed place information
-    if (this.placesService) {
-      this.placesService.getDetails(
-        {
-          placeId: suggestion.place_id,
-          fields: ['geometry', 'formatted_address']
-        },
-        (place: any, status: any) => {
-          if (status === google.maps.places.PlacesServiceStatus.OK && place.geometry) {
-            const location = place.geometry.location;
-            
-            // Update or create delivery marker
-            if (this.deliveryMarker) {
-              this.deliveryMarker.setPosition(location);
-            } else {
-              this.deliveryMarker = new google.maps.Marker({
-                position: location,
-                map: this.map,
-                title: 'Địa chỉ giao xe',
-                icon: {
-                  url: 'data:image/svg+xml;base64,' + btoa(`
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#5fcf86" width="32" height="32">
-                      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-                    </svg>
-                  `),
-                  scaledSize: new google.maps.Size(32, 32),
-                  anchor: new google.maps.Point(16, 32)
-                }
-              });
-            }
+    const lat = parseFloat(suggestion.lat);
+    const lng = parseFloat(suggestion.lon);
 
-            // Center map to show both markers
-            const bounds = new google.maps.LatLngBounds();
-            bounds.extend(this.carCoordinates);
-            bounds.extend(location);
-            this.map.fitBounds(bounds);
-            
-            // Store coordinates for calculation
-            suggestion.geometry = {
-              location: {
-                lat: location.lat(),
-                lng: location.lng()
-              }
-            };
-          }
-        }
-      );
+    // Store selected coordinates
+    this.selectedCoordinates = { lat, lng };
+
+    // Update or create delivery marker
+    if (this.deliveryMarker && this.map) {
+      this.deliveryMarker.setLatLng([lat, lng]);
+    } else if (this.map) {
+      const deliveryIcon = L.icon({
+        iconUrl: MAPS_CONFIG.MARKERS.DELIVERY.iconUrl,
+        iconSize: MAPS_CONFIG.MARKERS.DELIVERY.iconSize as [number, number],
+        iconAnchor: MAPS_CONFIG.MARKERS.DELIVERY.iconAnchor as [number, number],
+        popupAnchor: MAPS_CONFIG.MARKERS.DELIVERY.popupAnchor as [number, number]
+      });
+
+      this.deliveryMarker = L.marker([lat, lng], { icon: deliveryIcon }).addTo(this.map);
+      this.deliveryMarker.bindPopup('Địa chỉ giao xe');
+    }
+
+    // Fit map to show both markers
+    if (this.map && this.carMarker && this.deliveryMarker) {
+      const bounds = L.latLngBounds([
+        this.carMarker.getLatLng(),
+        this.deliveryMarker.getLatLng()
+      ]);
+      this.map.fitBounds(bounds, { padding: [50, 50] });
     }
   }
 
@@ -280,9 +346,8 @@ export class DeliveryAddressModalComponent implements OnInit, OnDestroy {
     this.calculating = true;
     this.deliveryError = null;
 
-    // Simulate API call delay
     setTimeout(() => {
-      // Get coordinates from selected suggestion or geocode address
+      // Get coordinates from selected location or geocode address
       this.geocodeAddress(this.deliveryForm.get('address')?.value).then((coordinates) => {
         if (coordinates) {
           // Calculate distance
@@ -307,6 +372,7 @@ export class DeliveryAddressModalComponent implements OnInit, OnDestroy {
           this.selectedAddress = this.deliveryForm.get('address')?.value;
           this.calculatedDistance = distance;
           this.deliveryFee = deliveryFee;
+          this.selectedCoordinates = coordinates;
           this.isDeliveryCalculated = true;
           this.calculating = false;
 
@@ -318,37 +384,36 @@ export class DeliveryAddressModalComponent implements OnInit, OnDestroy {
         this.deliveryError = 'Có lỗi xảy ra khi tính toán. Vui lòng thử lại.';
         this.calculating = false;
       });
-    }, 1500); // Simulate processing time
+    }, 1000);
   }
 
   async geocodeAddress(address: string): Promise<{lat: number, lng: number} | null> {
-    return new Promise((resolve) => {
-      if (this.deliveryMarker) {
-        // Use coordinates from marker if available
-        const position = this.deliveryMarker.getPosition();
-        resolve({
-          lat: position.lat(),
-          lng: position.lng()
-        });
-      } else {
-        // Geocode the address
-        const geocoder = new google.maps.Geocoder();
-        geocoder.geocode(
-          { address: address + ', Vietnam' },
-          (results: any[], status: any) => {
-            if (status === google.maps.GeocoderStatus.OK && results[0]) {
-              const location = results[0].geometry.location;
-              resolve({
-                lat: location.lat(),
-                lng: location.lng()
-              });
-            } else {
-              resolve(null);
-            }
-          }
-        );
+    // If we have selected coordinates, use them
+    if (this.selectedCoordinates.lat !== 0 && this.selectedCoordinates.lng !== 0) {
+      return this.selectedCoordinates;
+    }
+
+    // Otherwise, geocode the address using Nominatim
+    try {
+      const searchQuery = encodeURIComponent(address + ', Vietnam');
+      const response = await fetch(`${MAPS_CONFIG.NOMINATIM_API}/search?format=json&q=${searchQuery}&limit=1`, {
+        headers: {
+          'User-Agent': 'Vrooomie Car Rental App'
+        }
+      });
+      const data = await response.json();
+      
+      if (data && data.length > 0) {
+        return {
+          lat: parseFloat(data[0].lat),
+          lng: parseFloat(data[0].lon)
+        };
       }
-    });
+      return null;
+    } catch (error) {
+      console.error('Error geocoding address:', error);
+      return null;
+    }
   }
 
   goBackToForm(): void {
@@ -363,10 +428,7 @@ export class DeliveryAddressModalComponent implements OnInit, OnDestroy {
       notes: this.deliveryForm.get('notes')?.value,
       distance: this.calculatedDistance,
       deliveryFee: this.deliveryFee,
-      coordinates: {
-        lat: this.deliveryMarker?.getPosition()?.lat() || 0,
-        lng: this.deliveryMarker?.getPosition()?.lng() || 0
-      }
+      coordinates: this.selectedCoordinates
     };
 
     this.deliveryConfirmed.emit(deliveryInfo);

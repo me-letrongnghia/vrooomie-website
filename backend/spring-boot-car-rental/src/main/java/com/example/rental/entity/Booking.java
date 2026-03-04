@@ -1,5 +1,6 @@
 package com.example.rental.entity;
 
+import com.example.rental.enums.BookingStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,6 +12,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "bookings")
@@ -32,6 +35,10 @@ public class Booking {
     @ManyToOne(optional = false)
     @JoinColumn(name = "renter_id")
     private User renter;
+    
+    @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Payment> payments = new ArrayList<>();
 
     private LocalDate startDate;
 
@@ -39,13 +46,6 @@ public class Booking {
 
     @Enumerated(EnumType.STRING)
     private BookingStatus status = BookingStatus.PENDING;
-
-    public enum BookingStatus {
-        PENDING,
-        CONFIRMED,
-        CANCELED,
-        COMPLETED
-    }
 
     private BigDecimal totalPrice;
 

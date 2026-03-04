@@ -2,6 +2,7 @@ package com.example.rental.repository;
 
 import com.example.rental.entity.Booking;
 import com.example.rental.entity.User;
+import com.example.rental.enums.BookingStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -35,6 +36,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     List<Booking> findByRenter(User renter);
     List<Booking> findByCarOwner(User owner);
-    List<Booking> findByCarOwnerAndStatus(User owner, Booking.BookingStatus status);
+    List<Booking> findByCarOwnerAndStatus(User owner, BookingStatus status);
 }
 

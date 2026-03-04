@@ -13,6 +13,8 @@ export interface CarCreateRequest {
   imageUrl: string;
   address: string;
   description: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 @Injectable({

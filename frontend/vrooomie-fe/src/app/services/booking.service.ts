@@ -12,11 +12,19 @@ export interface BookingRequest {
 export interface BookingResponse {
   id: number;
   carId: number;
+  carBrand: string;
+  carModel: string;
+  carLicensePlate: string;
+  renterId: number;
+  renterName: string;
+  renterEmail: string;
   startDate: string;
   endDate: string;
   status: string;
   totalPrice: number;
-  createdAt: string;
+  paymentMethod: string;
+  deliveryMethod: string;
+  paymentStatus: string;
 }
 
 @Injectable({

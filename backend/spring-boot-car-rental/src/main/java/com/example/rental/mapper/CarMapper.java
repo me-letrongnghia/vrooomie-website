@@ -19,6 +19,8 @@ public class CarMapper {
                 .status(car.getStatus().name())
                 .imageUrl(car.getImageUrl())
                 .address(car.getAddress())
+                .latitude(car.getLatitude())
+                .longitude(car.getLongitude())
                 .description(car.getDescription())
                 .build();
     }
@@ -34,6 +36,8 @@ public class CarMapper {
                 .status(Car.CarStatus.AVAILABLE)
                 .imageUrl(req.getImageUrl())
                 .address(req.getAddress())
+                .latitude(req.getLatitude())
+                .longitude(req.getLongitude())
                 .description(req.getDescription())
                 .build();
     }

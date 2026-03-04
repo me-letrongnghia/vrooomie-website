@@ -73,6 +73,15 @@ app:
     default-user-role: ${OAUTH2_DEFAULT_USER_ROLE}
   backend-url: ${BACKEND_URL}
 
+# PayOS Configuration
+payos:
+  client-id: ${PAYOS_CLIENT_ID}
+  api-key: ${PAYOS_API_KEY}
+  checksum-key: ${PAYOS_CHECKSUM_KEY}
+  return-url: ${FRONTEND_URL}/payment/success
+  cancel-url: ${FRONTEND_URL}/payment/cancel
+  payment-link-expiration-minutes: 15
+
 cors:
   allowed-origins: ${FRONTEND_URL}
 

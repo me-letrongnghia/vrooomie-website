@@ -9,5 +9,7 @@ export interface Car {
   status: string;
   imageUrl: string;
   address: string;
+  latitude?: number;
+  longitude?: number;
   description: string;
 } 

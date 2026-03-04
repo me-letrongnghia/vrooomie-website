@@ -21,6 +21,8 @@ import { CarDetailComponent } from './components/car-detail/car-detail.component
 import { AuthInterceptor } from './interceptors/auth.interceptor';
 import { DeliveryAddressModalComponent } from './components/delivery-address-modal/delivery-address-modal.component';
 import { AuthCallbackComponent } from './components/auth-callback/auth-callback.component';
+import { PaymentSuccessComponent } from './components/payment-success/payment-success.component';
+import { PaymentCancelComponent } from './components/payment-cancel/payment-cancel.component';
 
 @NgModule({
   declarations: [
@@ -39,7 +41,9 @@ import { AuthCallbackComponent } from './components/auth-callback/auth-callback.
     LoaderComponent,
     CarDetailComponent,
     DeliveryAddressModalComponent,
-    AuthCallbackComponent
+    AuthCallbackComponent,
+    PaymentSuccessComponent,
+    PaymentCancelComponent
   ],
   imports: [
     BrowserModule,

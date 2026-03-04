@@ -268,11 +268,100 @@
           <h2><i class="fa-solid fa-road"></i> Chuyến của tôi</h2>
           <p>Lịch sử các chuyến đi của bạn</p>
         </div>
-        <div class="empty-state">
+
+        <!-- Loading State -->
+        <div *ngIf="bookingsLoading" class="loading-container">
+          <div class="spinner"></div>
+          <p>Đang tải danh sách chuyến đi...</p>
+        </div>
+
+        <!-- Error State -->
+        <div *ngIf="bookingsError && !bookingsLoading" class="error-container">
+          <i class="fa-solid fa-exclamation-circle error-icon"></i>
+          <p>{{ bookingsError }}</p>
+          <button class="primary-btn" (click)="loadUserBookings()">Thử lại</button>
+        </div>
+
+        <!-- Empty State -->
+        <div *ngIf="!bookingsLoading && !bookingsError && userBookings.length === 0" class="empty-state">
           <i class="fa-solid fa-road empty-icon"></i>
           <p>Bạn chưa có chuyến đi nào</p>
           <p>Hãy thuê xe và bắt đầu cuộc phiêu lưu của bạn!</p>
-          <button class="primary-btn">Tìm xe</button>
+          <button class="primary-btn" [routerLink]="['/']">Tìm xe</button>
+        </div>
+
+        <!-- Bookings List -->
+        <div *ngIf="!bookingsLoading && !bookingsError && userBookings.length > 0" class="bookings-grid">
+          <div *ngFor="let booking of userBookings" class="booking-card">
+            <div class="booking-header">
+              <div class="booking-id">
+                <i class="fa-solid fa-hashtag"></i>
+                <span>Mã đơn: {{ booking.id }}</span>
+              </div>
+              <span class="booking-status" [ngClass]="getBookingStatusClass(booking.status)">
+                {{ getBookingStatusText(booking.status) }}
+              </span>
+            </div>
+
+            <div class="booking-car-info">
+              <div class="car-name">
+                <i class="fa-solid fa-car"></i>
+                <span>{{ booking.carBrand }} {{ booking.carModel }}</span>
+              </div>
+              <div class="car-license">
+                <i class="fa-solid fa-id-card"></i>
+                <span>{{ booking.carLicensePlate }}</span>
+              </div>
+            </div>
+
+            <div class="booking-dates">
+              <div class="date-item">
+                <i class="fa-solid fa-calendar-check"></i>
+                <div>
+                  <label>Ngày nhận</label>
+                  <span>{{ formatBookingDate(booking.startDate) }}</span>
+                </div>
+              </div>
+              <div class="date-separator">
+                <i class="fa-solid fa-arrow-right"></i>
+              </div>
+              <div class="date-item">
+                <i class="fa-solid fa-calendar-xmark"></i>
+                <div>
+                  <label>Ngày trả</label>
+                  <span>{{ formatBookingDate(booking.endDate) }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="booking-payment-info">
+              <div class="payment-method">
+                <label>Phương thức thanh toán:</label>
+                <span>{{ booking.paymentMethod === 'PAYOS' ? 'PayOS' : 'Tiền mặt' }}</span>
+              </div>
+              <div class="delivery-method">
+                <label>Phương thức giao xe:</label>
+                <span>{{ booking.deliveryMethod === 'DELIVERY' ? 'Giao xe tận nơi' : 'Nhận tại địa chỉ chủ xe' }}</span>
+              </div>
+              <div class="payment-status">
+                <label>Trạng thái thanh toán:</label>
+                <span [ngClass]="getPaymentStatusClass(booking.paymentStatus)">
+                  {{ getPaymentStatusText(booking.paymentStatus) }}
+                </span>
+              </div>
+            </div>
+
+            <div class="booking-footer">
+              <div class="total-price">
+                <label>Tổng tiền:</label>
+                <span class="price">{{ formatPrice(booking.totalPrice) }}đ</span>
+              </div>
+              <button class="view-detail-btn" (click)="onViewBooking(booking.id)">
+                <i class="fa-solid fa-eye"></i>
+                Chi tiết
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -560,6 +649,28 @@
         <span class="error-message" *ngIf="isFieldInvalid('address')">
           {{ getFieldError('address') }}
         </span>
+      </div>
+
+      <!-- Location Picker -->
+      <div class="form-group location-picker-section">
+        <label>
+          <i class="fa-solid fa-map-location-dot"></i>
+          Vị trí chính xác (Tùy chọn)
+        </label>
+        <p class="location-hint">
+          Click vào bản đồ để đánh dấu vị trí chính xác của xe, giúp khách hàng dễ dàng tìm xe hơn
+        </p>
+        
+        <div class="location-picker-container">
+          <div id="createCarMap" class="location-map"></div>
+          <div class="location-coordinates" *ngIf="createCarForm.value.latitude && createCarForm.value.longitude">
+            <i class="fa-solid fa-location-crosshairs"></i>
+            <span>{{ createCarForm.value.latitude?.toFixed(6) }}, {{ createCarForm.value.longitude?.toFixed(6) }}</span>
+            <button type="button" class="clear-location-btn" (click)="clearLocation()">
+              <i class="fa-solid fa-times"></i>
+            </button>
+          </div>
+        </div>
       </div>
 
       <div class="form-group">

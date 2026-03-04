@@ -47,6 +47,11 @@ public class Car {
     @Column(nullable = false)
     private String address;
 
+    // GPS coordinates for precise location
+    private Double latitude;
+    
+    private Double longitude;
+
     @Column(length = 2000)
     private String description;
 

@@ -7,6 +7,7 @@ import { BookingService, BookingRequest, BookingResponse } from '../../services/
 import { AuthService } from '../../services/auth.service';
 import { AppComponent } from '../../app.component';
 import { DeliveryInfo } from '../delivery-address-modal/delivery-address-modal.component';
+import { PaymentService, PaymentRequest } from '../../services/payment.service';
 
 interface Review {
   id: number;
@@ -50,12 +51,15 @@ export class CarDetailComponent implements OnInit {
 
   // Delivery and Payment methods
   selectedDeliveryMethod: 'PICKUP' | 'DELIVERY' = 'PICKUP';
-  selectedPaymentMethod: 'CASH' | 'ONLINE' = 'CASH';
+  selectedPaymentMethod: 'CASH' | 'PAYOS' = 'CASH';
   showDeliveryModal = false;
   deliveryInfo: DeliveryInfo | null = null;
   
   // Insurance options
   additionalInsuranceSelected = false;
+  
+  // Payment info
+  showPaymentMethodSelection = false;
 
   // Mock reviews data
   reviews: Review[] = [
@@ -101,7 +105,8 @@ export class CarDetailComponent implements OnInit {
     public loadingService: LoadingService,
     private bookingService: BookingService,
     private authService: AuthService,
-    private appComponent: AppComponent
+    private appComponent: AppComponent,
+    private paymentService: PaymentService
   ) {
     // Set default dates (today and tomorrow)
     const today = new Date();
@@ -483,6 +488,19 @@ export class CarDetailComponent implements OnInit {
       return;
     }
 
+    // If PayOS selected, need to create payment first
+    if (this.selectedPaymentMethod === 'PAYOS') {
+      this.createBookingWithPayment();
+    } else {
+      // Cash payment - direct booking
+      this.createDirectBooking();
+    }
+  }
+
+  /**
+   * Create booking with PayOS payment
+   */
+  private createBookingWithPayment(): void {
     // Prepare booking request
     const bookingRequest: BookingRequest = {
       carId: this.car?.id || 0,
@@ -490,7 +508,65 @@ export class CarDetailComponent implements OnInit {
       endDate: this.returnDate
     };
 
-    // Start booking process
+    this.bookingLoading = true;
+
+    // Step 1: Create booking
+    this.bookingService.createBooking(bookingRequest).subscribe({
+      next: (bookingResponse) => {
+        console.log('Booking created:', bookingResponse);
+
+        // Step 2: Create payment for the booking
+        const totalAmount = this.calculateTotalPrice();
+        const depositAmount = this.paymentService.calculateDepositAmount(totalAmount);
+
+        const paymentRequest: PaymentRequest = {
+          bookingId: bookingResponse.id,
+          paymentType: 'DEPOSIT',
+          paymentMethod: 'PAYOS',
+          amount: depositAmount,
+          description: `Đặt cọc thuê xe ${this.car?.brand} ${this.car?.model} - Booking #${bookingResponse.id}`
+        };
+
+        this.paymentService.createPayment(paymentRequest).subscribe({
+          next: (paymentResponse) => {
+            console.log('Payment created:', paymentResponse);
+            this.bookingLoading = false;
+
+            // Save booking ID to localStorage for payment callback
+            localStorage.setItem('pendingBookingId', bookingResponse.id.toString());
+
+            // Redirect to PayOS payment page
+            if (paymentResponse.paymentUrl) {
+              this.paymentService.redirectToPayment(paymentResponse.paymentUrl);
+            } else {
+              this.bookingError = 'Không thể tạo link thanh toán';
+            }
+          },
+          error: (error) => {
+            this.bookingLoading = false;
+            this.bookingError = 'Có lỗi xảy ra khi tạo thanh toán: ' + (error.error?.message || error.message);
+            console.error('Payment creation error:', error);
+          }
+        });
+      },
+      error: (error) => {
+        this.bookingLoading = false;
+        this.bookingError = error.error?.message || 'Có lỗi xảy ra khi đặt xe. Vui lòng thử lại.';
+        console.error('Booking error:', error);
+      }
+    });
+  }
+
+  /**
+   * Create booking with cash payment (original flow)
+   */
+  private createDirectBooking(): void {
+    const bookingRequest: BookingRequest = {
+      carId: this.car?.id || 0,
+      startDate: this.pickupDate,
+      endDate: this.returnDate
+    };
+
     this.bookingLoading = true;
 
     this.bookingService.createBooking(bookingRequest).subscribe({
@@ -562,7 +638,7 @@ export class CarDetailComponent implements OnInit {
   }
 
   // Payment method handlers
-  onPaymentMethodChange(method: 'CASH' | 'ONLINE'): void {
+  onPaymentMethodChange(method: 'CASH' | 'PAYOS'): void {
     this.selectedPaymentMethod = method;
   }
 

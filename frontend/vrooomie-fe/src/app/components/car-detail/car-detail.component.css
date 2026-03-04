@@ -1695,3 +1695,96 @@
         font-size: 12px;
     }
 }
+
+/* Payment Method Section */
+.payment-method-section {
+    background: #f8f9fa;
+    margin-top: 16px;
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+}
+
+.payment-method-section .method-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 16px;
+}
+
+.payment-method-option label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+}
+
+.payment-method-option label i {
+    font-size: 20px;
+    color: #5fcf86;
+}
+
+.payment-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+}
+
+.payment-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+}
+
+.payment-desc {
+    font-size: 12px;
+    color: #666;
+}
+
+.deposit-badge {
+    position: absolute;
+    top: -8px;
+    right: 8px;
+    background: linear-gradient(135deg, #5fcf86 0%, #4fb570 100%);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(95, 207, 134, 0.3);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+@media (max-width: 768px) {
+    .payment-method-section {
+        padding: 16px;
+        margin-top: 12px;
+    }
+
+    .payment-method-option {
+        padding: 12px;
+    }
+
+    .payment-name {
+        font-size: 13px;
+    }
+
+    .payment-desc {
+        font-size: 11px;
+    }
+
+    .deposit-badge {
+        font-size: 11px;
+        padding: 3px 10px;
+    }
+}

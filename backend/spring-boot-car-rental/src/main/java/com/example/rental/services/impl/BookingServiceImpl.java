@@ -5,6 +5,7 @@ import com.example.rental.dto.BookingRequest;
 import com.example.rental.entity.Booking;
 import com.example.rental.entity.Car;
 import com.example.rental.entity.User;
+import com.example.rental.enums.BookingStatus;
 import com.example.rental.mapper.BookingMapper;
 import com.example.rental.repository.BookingRepository;
 import com.example.rental.repository.CarRepository;
@@ -46,7 +47,7 @@ public class BookingServiceImpl implements IBookingService {
                 .startDate(request.getStartDate())
                 .endDate(request.getEndDate())
                 .totalPrice(calculateTotal(car.getPricePerDay(), request.getStartDate(), request.getEndDate()))
-                .status(Booking.BookingStatus.PENDING)
+                .status(BookingStatus.PENDING)
                 .build();
 
         bookingRepository.save(booking);
@@ -72,7 +73,7 @@ public class BookingServiceImpl implements IBookingService {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new RuntimeException("Booking not found"));
 
-        if (booking.getStatus().equals(Booking.BookingStatus.CANCELED)) {
+        if (booking.getStatus().equals(BookingStatus.CANCELED)) {
             throw new RuntimeException("This booking has been canceled and cannot be confirmed");
         }
 
@@ -80,11 +81,11 @@ public class BookingServiceImpl implements IBookingService {
             throw new RuntimeException("You are not the owner of this car");
         }
 
-        if (!booking.getStatus().equals(Booking.BookingStatus.PENDING)) {
+        if (!booking.getStatus().equals(BookingStatus.PENDING)) {
             throw new RuntimeException("Only pending bookings can be confirmed");
         }
 
-        booking.setStatus(Booking.BookingStatus.CONFIRMED);
+        booking.setStatus(BookingStatus.CONFIRMED);
         bookingRepository.save(booking);
 
         // Optionally: Gửi email thông báo cho người thuê
@@ -101,7 +102,7 @@ public class BookingServiceImpl implements IBookingService {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new RuntimeException("Booking not found"));
 
-        if (booking.getStatus().equals(Booking.BookingStatus.CONFIRMED)) {
+        if (booking.getStatus().equals(BookingStatus.CONFIRMED)) {
             throw new RuntimeException("This booking has been confirmed and cannot be canceled");
         }
 
@@ -109,11 +110,11 @@ public class BookingServiceImpl implements IBookingService {
             throw new RuntimeException("You are not the owner of this car");
         }
 
-        if (booking.getStatus().equals(Booking.BookingStatus.CANCELED)) {
+        if (booking.getStatus().equals(BookingStatus.CANCELED)) {
             throw new RuntimeException("Booking is already canceled");
         }
 
-        booking.setStatus(Booking.BookingStatus.CANCELED);
+        booking.setStatus(BookingStatus.CANCELED);
         bookingRepository.save(booking);
 
         // Optionally: Gửi email thông báo cho người thuê
@@ -149,9 +150,9 @@ public class BookingServiceImpl implements IBookingService {
         if (status == null || status.isBlank()) {
             bookings = bookingRepository.findByCarOwner(owner);
         } else {
-            Booking.BookingStatus bookingStatus;
+            BookingStatus bookingStatus;
             try {
-                bookingStatus = Booking.BookingStatus.valueOf(status.toUpperCase());
+                bookingStatus = BookingStatus.valueOf(status.toUpperCase());
             } catch (IllegalArgumentException e) {
                 throw new RuntimeException("Invalid booking status: " + status);
             }

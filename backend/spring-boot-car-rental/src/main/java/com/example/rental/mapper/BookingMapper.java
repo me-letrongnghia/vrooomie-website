@@ -5,6 +5,7 @@ import com.example.rental.dto.BookingRequest;
 import com.example.rental.entity.Booking;
 import com.example.rental.entity.Car;
 import com.example.rental.entity.User;
+import com.example.rental.enums.BookingStatus;
 
 import java.math.BigDecimal;
 
@@ -35,7 +36,7 @@ public class BookingMapper {
                 .renter(renter)
                 .startDate(req.getStartDate())
                 .endDate(req.getEndDate())
-                .status(Booking.BookingStatus.PENDING)
+                .status(BookingStatus.PENDING)
                 .totalPrice(totalPrice)
                 .build();
     }

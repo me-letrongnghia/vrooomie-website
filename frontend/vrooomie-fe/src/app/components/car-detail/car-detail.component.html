@@ -475,6 +475,41 @@
                     </div>
                 </div>
 
+                <!-- Payment Method Selection -->
+                <div class="payment-method-section">
+                    <h4 class="method-title">Phương thức thanh toán</h4>
+                    <div class="payment-method-options">
+                        <div class="payment-method-option" [class.selected]="selectedPaymentMethod === 'CASH'">
+                            <input type="radio" id="cash-payment" name="paymentMethod" value="CASH"
+                                [checked]="selectedPaymentMethod === 'CASH'"
+                                (change)="selectedPaymentMethod = 'CASH'">
+                            <label for="cash-payment">
+                                <i class="fas fa-money-bill-wave"></i>
+                                <div class="payment-info">
+                                    <span class="payment-name">Tiền mặt</span>
+                                    <span class="payment-desc">Thanh toán toàn bộ khi nhận xe</span>
+                                </div>
+                            </label>
+                        </div>
+
+                        <div class="payment-method-option" [class.selected]="selectedPaymentMethod === 'PAYOS'">
+                            <input type="radio" id="payos-payment" name="paymentMethod" value="PAYOS"
+                                [checked]="selectedPaymentMethod === 'PAYOS'"
+                                (change)="selectedPaymentMethod = 'PAYOS'">
+                            <label for="payos-payment">
+                                <i class="fas fa-credit-card"></i>
+                                <div class="payment-info">
+                                    <span class="payment-name">Thanh toán online (PayOS)</span>
+                                    <span class="payment-desc">Đặt cọc 30% ngay - Thanh toán 70% khi nhận xe</span>
+                                </div>
+                            </label>
+                            <div class="deposit-badge" *ngIf="selectedPaymentMethod === 'PAYOS'">
+                                Cọc: {{ formatPriceK(Math.round(calculateTotalPrice() * 0.3)) }}K
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Book Button -->
                 <button (click)="onBookNow()" class="book-button" [disabled]="bookingLoading">
                     <span *ngIf="!bookingLoading && isAuthenticated && car.status === 'AVAILABLE' || car.status === 'BOOKED'"><i class="fa-solid fa-bolt"></i> CHỌN THUÊ</span>
@@ -500,7 +535,11 @@
     </div>
 
     <!-- Delivery Address Modal -->
-    <app-delivery-address-modal *ngIf="showDeliveryModal" [carAddress]="car?.address || ''"
-        (close)="onDeliveryModalClose()" (deliveryConfirmed)="onDeliveryConfirmed($event)">
+    <app-delivery-address-modal *ngIf="showDeliveryModal" 
+        [carAddress]="car?.address || ''"
+        [carLatitude]="car?.latitude"
+        [carLongitude]="car?.longitude"
+        (close)="onDeliveryModalClose()" 
+        (deliveryConfirmed)="onDeliveryConfirmed($event)">
     </app-delivery-address-modal>
 </div>
