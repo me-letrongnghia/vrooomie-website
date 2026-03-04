@@ -70,6 +70,10 @@ services:
       FRONTEND_URL: ${APP_PROTOCOL}://${APP_DOMAIN}:${FRONTEND_PORT}
       # Backend URL for email verification
       BACKEND_URL: ${APP_PROTOCOL}://${APP_DOMAIN}:${BACKEND_PORT}
+      # PayOS
+      PAYOS_CLIENT_ID: ${PAYOS_CLIENT_ID}
+      PAYOS_API_KEY: ${PAYOS_API_KEY}
+      PAYOS_CHECKSUM_KEY: ${PAYOS_CHECKSUM_KEY}
     depends_on:
       mysql:
         condition: service_healthy
