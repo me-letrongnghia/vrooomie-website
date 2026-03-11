@@ -28,14 +28,30 @@ public class BookingController {
     @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<?> confirmBooking(@PathVariable Long id, @AuthenticationPrincipal User currentUser) {
         iBookingService.confirmBooking(id, currentUser);
-        return ResponseEntity.ok("Booking confirmed.");
+        return ResponseEntity.ok(java.util.Map.of(
+            "success", true,
+            "message", "Booking confirmed."
+        ));
     }
 
     @PutMapping("/{id}/cancel")
     @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<?> cancelBooking(@PathVariable Long id, @AuthenticationPrincipal User currentUser) {
         iBookingService.cancelBooking(id, currentUser);
-        return ResponseEntity.ok("Booking canceled.");
+        return ResponseEntity.ok(java.util.Map.of(
+            "success", true,
+            "message", "Booking canceled."
+        ));
+    }
+
+    @PutMapping("/{id}/complete")
+    @PreAuthorize("hasRole('OWNER')")
+    public ResponseEntity<?> completeBooking(@PathVariable Long id, @AuthenticationPrincipal User currentUser) {
+        iBookingService.completeBooking(id, currentUser);
+        return ResponseEntity.ok(java.util.Map.of(
+            "success", true,
+            "message", "Booking completed."
+        ));
     }
 
     @GetMapping("/my")
