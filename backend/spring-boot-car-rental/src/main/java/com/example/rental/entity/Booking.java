@@ -53,6 +53,13 @@ public class Booking {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
+    // Reminder & Warning tracking
+    @Column(name = "reminder_sent")
+    private Boolean reminderSent = false;
+
+    @Column(name = "warning_sent")
+    private Boolean warningSent = false;
+
     @Enumerated(EnumType.STRING)
     private PaymentMethod paymentMethod;
 

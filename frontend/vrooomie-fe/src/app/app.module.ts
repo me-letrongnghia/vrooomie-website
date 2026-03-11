@@ -1,20 +1,18 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule, provideClientHydration, withEventReplay } from '@angular/platform-browser';
+import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { CarListComponent } from './components/car-list/car-list.component';
 import { PromotionListComponent } from './components/promotion-list/promotion-list.component';
 import { AboutUsComponent } from './components/about-us/about-us.component';
-import { MyTripComponent } from './components/my-trip/my-trip.component';
 import { HeroSectionComponent } from './components/hero-section/hero-section.component';
 import { LocationSectionComponent } from './components/location-section/location-section.component';
 import { HomeComponent } from './components/home/home.component';
-import { BecomeCarOwnerComponent } from './components/become-car-owner/become-car-owner.component';
 import { LoginComponent } from './components/login/login.component';
 import { RegisterComponent } from './components/register/register.component';
-import { CommonModule } from '@angular/common';
-import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { UserDetailInfoComponent } from './components/user-detail-info/user-detail-info.component';
 import { LoaderComponent } from './shared/loader/loader.component';
 import { CarDetailComponent } from './components/car-detail/car-detail.component';
@@ -23,6 +21,9 @@ import { DeliveryAddressModalComponent } from './components/delivery-address-mod
 import { AuthCallbackComponent } from './components/auth-callback/auth-callback.component';
 import { PaymentSuccessComponent } from './components/payment-success/payment-success.component';
 import { PaymentCancelComponent } from './components/payment-cancel/payment-cancel.component';
+import { CarManagementComponent } from './components/car-management/car-management.component';
+import { MyCarsComponent } from './components/my-cars/my-cars.component';
+import { MyTripsComponent } from './components/my-trips/my-trips.component';
 
 @NgModule({
   declarations: [
@@ -30,11 +31,9 @@ import { PaymentCancelComponent } from './components/payment-cancel/payment-canc
     CarListComponent,
     PromotionListComponent,
     AboutUsComponent,
-    MyTripComponent,
     HeroSectionComponent,
     LocationSectionComponent,
     HomeComponent,
-    BecomeCarOwnerComponent,
     LoginComponent,
     RegisterComponent,
     UserDetailInfoComponent,
@@ -43,15 +42,18 @@ import { PaymentCancelComponent } from './components/payment-cancel/payment-canc
     DeliveryAddressModalComponent,
     AuthCallbackComponent,
     PaymentSuccessComponent,
-    PaymentCancelComponent
+    PaymentCancelComponent,
+    CarManagementComponent,
+    MyCarsComponent,
+    MyTripsComponent
   ],
   imports: [
     BrowserModule,
-    AppRoutingModule,
-    HttpClientModule,
+    CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    CommonModule
+    HttpClientModule,
+    AppRoutingModule
   ],
   providers: [
     provideClientHydration(withEventReplay()),

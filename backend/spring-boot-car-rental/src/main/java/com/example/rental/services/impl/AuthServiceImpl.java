@@ -6,6 +6,9 @@ import com.example.rental.mapper.UserMapper;
 import com.example.rental.repository.UserRepository;
 import com.example.rental.services.IAuthService;
 import com.example.rental.utils.JwtUtil;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.SignatureException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -107,11 +110,13 @@ public class AuthServiceImpl implements IAuthService {
 
         String refreshToken = jwtUtil.generateRefreshToken(user);
 
+        Long id = user.getId();
+
         String email = user.getEmail();
 
         String fullName = user.getFullName();
 
-        return new LoginResponse(accessToken, refreshToken, email, fullName);
+        return new LoginResponse(accessToken, refreshToken, id, email, fullName);
     }
 
     @Override
@@ -119,13 +124,28 @@ public class AuthServiceImpl implements IAuthService {
 
         String refreshToken = request.getRefreshToken();
         if (refreshToken == null || refreshToken.isEmpty()) {
-            throw new RuntimeException(refreshToken + "Refresh token is required");
+            throw new RuntimeException("Refresh token is required");
         }
 
-        String email = jwtUtil.extractEmail(refreshToken);
+        String email;
+        try {
+            email = jwtUtil.extractEmail(refreshToken);
+        } catch (ExpiredJwtException e) {
+            throw new RuntimeException("Refresh token has expired");
+        } catch (MalformedJwtException e) {
+            throw new RuntimeException("Invalid token format");
+        } catch (SignatureException e) {
+            throw new RuntimeException("Invalid token signature");
+        } catch (Exception e) {
+            throw new RuntimeException("Invalid refresh token: " + e.getMessage());
+        }
+
+        if (email == null || email.isEmpty()) {
+            throw new RuntimeException("Invalid token: email claim missing");
+        }
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Invalid credentials"));
+                .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
 
         if (!jwtUtil.isTokenValid(refreshToken, user)) {
             throw new RuntimeException("Invalid refresh token or token has expired");
@@ -133,10 +153,12 @@ public class AuthServiceImpl implements IAuthService {
 
         String newAccessToken = jwtUtil.generateAccessToken(user);
 
-        System.out.println("New access token generated: " + newAccessToken); // Debug log
+        System.out.println("New access token generated for user: " + email); // Debug log
+
+        Long id = user.getId();
 
         String fullName = user.getFullName();
 
-        return new RefreshAccessTokenResponse(newAccessToken, refreshToken, email, fullName);
+        return new RefreshAccessTokenResponse(newAccessToken, refreshToken, id, email, fullName);
     }
 }
