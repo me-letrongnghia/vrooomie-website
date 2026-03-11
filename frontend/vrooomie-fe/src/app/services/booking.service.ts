@@ -25,6 +25,9 @@ export interface BookingResponse {
   paymentMethod: string;
   deliveryMethod: string;
   paymentStatus: string;
+  createdAt?: string; // ISO 8601 timestamp
+  reminderSent?: boolean;
+  warningSent?: boolean;
 }
 
 @Injectable({
@@ -46,13 +49,18 @@ export class BookingService {
   }
 
   // Confirm a booking (only for owner)
-  confirmBooking(bookingId: number): Observable<any> {
-    return this.http.put(`${this.apiUrl}/${bookingId}/confirm`, {});
+  confirmBooking(bookingId: number): Observable<{success: boolean, message: string}> {
+    return this.http.put<{success: boolean, message: string}>(`${this.apiUrl}/${bookingId}/confirm`, {});
   }
 
   // Cancel a booking (only for owner)
-  cancelBooking(bookingId: number): Observable<any> {
-    return this.http.put(`${this.apiUrl}/${bookingId}/cancel`, {});
+  cancelBooking(bookingId: number): Observable<{success: boolean, message: string}> {
+    return this.http.put<{success: boolean, message: string}>(`${this.apiUrl}/${bookingId}/cancel`, {});
+  }
+
+  // Complete a booking (only for owner)
+  completeBooking(bookingId: number): Observable<{success: boolean, message: string}> {
+    return this.http.put<{success: boolean, message: string}>(`${this.apiUrl}/${bookingId}/complete`, {});
   }
 
   // Get bookings for the owner's car

@@ -127,6 +127,58 @@ public class BookingServiceImpl implements IBookingService {
     }
 
     @Override
+    public void completeBooking(Long bookingId, User currentUser) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("Booking not found"));
+
+        // Kiểm tra quyền: chỉ chủ xe mới có thể complete booking
+        if (!booking.getCar().getOwner().getId().equals(currentUser.getId())) {
+            throw new RuntimeException("You are not the owner of this car");
+        }
+
+        // Chỉ có thể complete booking đã confirmed
+        if (!booking.getStatus().equals(BookingStatus.CONFIRMED)) {
+            throw new RuntimeException("Only confirmed bookings can be completed");
+        }
+
+        // Kiểm tra xem thời gian thuê đã kết thúc chưa
+        if (LocalDate.now().isBefore(booking.getEndDate())) {
+            throw new RuntimeException("Cannot complete booking before end date");
+        }
+
+        booking.setStatus(BookingStatus.COMPLETED);
+        bookingRepository.save(booking);
+
+        // Gửi email thông báo
+        iEmailService.sendBookingStatusNotification(
+                booking.getRenter(),
+                booking,
+                "Chuyến đi của bạn đã hoàn thành!",
+                "Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi. Chúc bạn có trải nghiệm tuyệt vời!"
+        );
+    }
+
+    @Override
+    public void autoCompleteExpiredBookings() {
+        LocalDate today = LocalDate.now();
+        List<Booking> expiredBookings = bookingRepository.findByStatusAndEndDateBefore(
+                BookingStatus.CONFIRMED, today);
+
+        for (Booking booking : expiredBookings) {
+            booking.setStatus(BookingStatus.COMPLETED);
+            bookingRepository.save(booking);
+
+            // Gửi email thông báo
+            iEmailService.sendBookingStatusNotification(
+                    booking.getRenter(),
+                    booking,
+                    "Chuyến đi của bạn đã hoàn thành!",
+                    "Chuyến thuê xe của bạn đã kết thúc. Cảm ơn bạn đã sử dụng dịch vụ!"
+            );
+        }
+    }
+
+    @Override
     public List<BookingResponse> getBookingsByRenter(User renter) {
         List<Booking> bookings = bookingRepository.findByRenter(renter);
         return bookings.stream()

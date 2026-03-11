@@ -1,0 +1,696 @@
+<div class="car-management-container">
+  <!-- Header Section -->
+  <div class="page-header">
+    <div class="header-content">
+      <div class="header-left">
+        <button class="back-btn" (click)="backToMyCars()">
+          <i class="fa-solid fa-arrow-left"></i>
+        </button>
+        <h1 class="page-title">Quản lý cho thuê</h1>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🚨 URGENT BOOKING NOTIFICATION BANNER -->
+  <div *ngIf="hasUrgentBookings()" class="urgent-notification-banner" [ngClass]="getUrgentLevel()">
+    <div class="urgent-banner-content">
+      <div class="urgent-icon">
+        <span *ngIf="getUrgentLevel() === 'danger'">🚨</span>
+        <span *ngIf="getUrgentLevel() === 'warning'">⚠️</span>
+      </div>
+      
+      <div class="urgent-message">
+        <h3 *ngIf="getUrgentLevel() === 'danger'">
+          KHẨN CẤP! Có {{ dangerBookings.length }} yêu cầu sắp tự động hủy
+        </h3>
+        <h3 *ngIf="getUrgentLevel() === 'warning'">
+          Có {{ warningBookings.length }} yêu cầu cần xác nhận gấp
+        </h3>
+        
+        <div class="urgent-bookings-list">
+          <div *ngFor="let booking of urgentBookings.slice(0, 3)" class="urgent-booking-item">
+            <div class="urgent-booking-info">
+              <strong>{{ booking.renterName }}</strong> - {{ booking.carBrand }} {{ booking.carModel }}
+            </div>
+            <div class="urgent-countdown" [ngClass]="getCountdown(booking.id)?.statusClass">
+              <span class="countdown-timer">⏰ {{ formatCountdown(getCountdown(booking.id)) }}</span>
+            </div>
+          </div>
+          <p *ngIf="urgentBookings.length > 3" class="more-urgent">
+            và {{ urgentBookings.length - 3 }} yêu cầu khác...
+          </p>
+        </div>
+      </div>
+      
+      <div class="urgent-actions">
+        <button (click)="switchTab('bookings')" class="btn-urgent-action">
+          Xem ngay
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs Navigation -->
+  <div class="tabs-navigation">
+    <div class="tabs-wrapper">
+      <button class="tab-link" [class.active]="activeTab === 'overview'" (click)="switchTab('overview')">
+        Thống kê
+      </button>
+      <button class="tab-link" [class.active]="activeTab === 'calendar'" (click)="switchTab('calendar')">
+        Lịch xe
+      </button>
+      <button class="tab-link" [class.active]="activeTab === 'bookings'" (click)="switchTab('bookings')">
+        Bookings
+      </button>
+      <button class="tab-link" [class.active]="activeTab === 'settings'" (click)="switchTab('settings')">
+        Thông tin xe
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="dots-loader">
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="content-section">
+    <div class="empty-state">
+      <i class="fa-solid fa-exclamation-triangle empty-icon"></i>
+      <h3>{{ error }}</h3>
+      <p>Vui lòng thử lại sau</p>
+    </div>
+  </div>
+
+  <!-- Content Sections -->
+  <div *ngIf="!loading && !error" class="content-section">
+
+    <!-- OVERVIEW TAB -->
+    <div *ngIf="activeTab === 'overview'">
+
+      <!-- Car Info Card (if viewing single car) -->
+      <!-- <div class="car-info-card" *ngIf="car">
+        <div class="car-info-left">
+          <img [src]="car.imageUrl" [alt]="car.brand + ' ' + car.model" class="car-thumbnail" />
+          <div class="car-details">
+            <h2 class="car-name">{{ car.brand }} {{ car.model }}</h2>
+            <p class="car-license">{{ car.licensePlate }}</p>
+            <div class="car-stats-inline">
+              <span class="stat-item">
+                <i class="fa-solid fa-star"></i>
+                {{ carStats.rating }} ({{ carStats.totalReviews }})
+              </span>
+              <span class="stat-item">
+                <i class="fa-solid fa-check-circle"></i>
+                {{ carStats.completedBookings }} chuyến
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="car-info-right">
+          <span class="car-status-badge" [ngClass]="'status-' + car.status.toLowerCase()">
+            {{ car.status === 'AVAILABLE' ? 'Có sẵn' : car.status }}
+          </span>
+        </div>
+      </div> -->
+
+      <!-- Statistics Cards -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fa-solid fa-chart-simple"></i></div>
+          <div class="stat-value">{{ formatPrice(carStats.totalRevenue) }}đ</div>
+          <div class="stat-label">Tổng doanh thu</div>
+          <div class="stat-trend">
+            <i class="fa-solid fa-arrow-up"></i>
+            +15% so với tháng trước
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fa-solid fa-calendar-check"></i></div>
+          <div class="stat-value">{{ carStats.totalDays }}</div>
+          <div class="stat-label">Ngày đã thuê</div>
+          <div class="stat-trend">
+            <i class="fa-solid fa-arrow-up"></i>
+            {{ carStats.occupancyRate.toFixed(1) }}% tỷ lệ lấp đầy
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fa-solid fa-hand-holding-dollar"></i></div>
+          <div class="stat-value">{{ formatPrice(carStats.averageRevenue) }}đ</div>
+          <div class="stat-label">Thu nhập TB/chuyến</div>
+          <div class="stat-trend">
+            Từ {{ carStats.completedBookings }} chuyến
+          </div>
+        </div>
+      </div>
+
+      <!-- Pending Bookings -->
+      <div class="overview-section" *ngIf="pendingBookings.length > 0">
+        <h2 class="section-title">
+          <i class="fa-solid fa-bell"></i>
+          Booking đang chờ duyệt ({{ pendingBookings.length }})
+        </h2>
+        <div class="pending-bookings-list">
+          <div class="pending-booking-item" *ngFor="let booking of pendingBookings">
+            <div class="booking-info">
+              <div class="booking-customer">
+                <i class="fa-solid fa-user"></i>
+                {{ booking.renterName }}
+              </div>
+              <div class="booking-details">
+                <span>
+                  <i class="fa-solid fa-calendar"></i>
+                  {{ formatDate(booking.startDate) }} - {{ formatDate(booking.endDate) }}
+                </span>
+                <span>
+                  <i class="fa-solid fa-money-bill"></i>
+                  {{ formatPrice(booking.totalPrice) }}đ
+                </span>
+                <span>
+                  <i class="fa-solid fa-phone"></i>
+                  {{ booking.renterEmail }}
+                </span>
+              </div>
+            </div>
+            <div class="booking-actions">
+              <button class="approve-btn" (click)="approveBooking(booking.id)">
+                <i class="fa-solid fa-check"></i>
+                Xác nhận
+              </button>
+              <button class="reject-btn" (click)="rejectBooking(booking.id)">
+                <i class="fa-solid fa-times"></i>
+                Từ chối
+              </button>
+              <button class="chat-btn">
+                <i class="fa-solid fa-comment"></i>
+                Chat
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- No Pending Bookings -->
+      <div class="overview-section" *ngIf="pendingBookings.length === 0">
+        <div class="empty-state">
+          <i class="fa-solid fa-check-circle empty-icon" style="color: #5fcf86;"></i>
+          <h3>Không có booking chờ duyệt</h3>
+          <p>Tất cả booking đã được xử lý</p>
+        </div>
+      </div>
+
+      <!-- Quick Stats -->
+      <div class="overview-section">
+        <h2 class="section-title">
+          <i class="fa-solid fa-magnifying-glass-chart"></i>
+          Thống kê nhanh
+        </h2>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon"><i class="fa-solid fa-hourglass-half"></i></div>
+            <div class="stat-value">{{ carStats.pendingBookings }}</div>
+            <div class="stat-label">Chờ duyệt</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon"><i class="fa-solid fa-clipboard-check"></i></div>
+            <div class="stat-value">{{ carStats.completedBookings }}</div>
+            <div class="stat-label">Hoàn thành</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon"><i class="fa-solid fa-circle-xmark"></i></div>
+            <div class="stat-value">{{ carStats.cancelledBookings }}</div>
+            <div class="stat-label">Đã hủy</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CALENDAR TAB -->
+    <div *ngIf="activeTab === 'calendar'">
+      <div class="calendar-container">
+        <div class="calendar-header">
+          <h2 class="calendar-month">{{ getMonthName() }}</h2>
+          <div class="calendar-nav">
+            <button class="calendar-nav-btn" (click)="previousMonth()">
+              <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            <button class="calendar-nav-btn" (click)="nextMonth()">
+              <i class="fa-solid fa-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="calendar-legend">
+          <div class="legend-item">
+            <div class="legend-color available"></div>
+            <span>Xe rảnh</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color pending"></div>
+            <span>Đang chờ duyệt</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color booked"></div>
+            <span>Đã book</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color closed"></div>
+            <span>Đóng lịch</span>
+          </div>
+        </div>
+
+        <div class="calendar-grid">
+          <!-- Day headers -->
+          <div class="calendar-day-header">CN</div>
+          <div class="calendar-day-header">T2</div>
+          <div class="calendar-day-header">T3</div>
+          <div class="calendar-day-header">T4</div>
+          <div class="calendar-day-header">T5</div>
+          <div class="calendar-day-header">T6</div>
+          <div class="calendar-day-header">T7</div>
+
+          <!-- Calendar days -->
+          <div *ngFor="let day of calendarDays" 
+               class="calendar-day" 
+               [class.empty]="day.status === 'empty'"
+               [class.available]="day.status === 'available'"
+               [class.pending]="day.status === 'pending'"
+               [class.booked]="day.status === 'booked'">
+            <div class="calendar-day-number" *ngIf="day.day">{{ day.day }}</div>
+            <div class="calendar-day-status" *ngIf="day.bookings && day.bookings.length > 0">
+              {{ day.bookings.length }} booking
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Upcoming Bookings -->
+      <div class="overview-section" style="margin-top: 30px;">
+        <h2 class="section-title">
+          <i class="fa-solid fa-clock"></i>
+          Lịch sắp tới
+        </h2>
+        <div class="bookings-list" *ngIf="confirmedBookings.length > 0">
+          <div class="booking-card" *ngFor="let booking of confirmedBookings.slice(0, 5)">
+            <div class="booking-header">
+              <div class="booking-id">
+                <i class="fa-solid fa-hashtag"></i>
+                Booking #{{ booking.id }}
+              </div>
+              <span class="booking-status status-confirmed">Đã xác nhận</span>
+            </div>
+            <div class="booking-body">
+              <div class="booking-customer-info">
+                <div class="info-label">Khách hàng</div>
+                <div class="info-value">
+                  <i class="fa-solid fa-user"></i>
+                  {{ booking.renterName }}
+                </div>
+              </div>
+              <div class="booking-dates-info">
+                <div class="info-label">Thời gian</div>
+                <div class="info-value">
+                  <i class="fa-solid fa-calendar"></i>
+                  {{ formatDate(booking.startDate) }} - {{ formatDate(booking.endDate) }}
+                </div>
+              </div>
+            </div>
+            <div class="booking-footer">
+              <div class="booking-price">{{ formatPrice(booking.totalPrice) }}đ</div>
+              <div class="booking-actions-group">
+                <button class="chat-btn">
+                  <i class="fa-solid fa-comment"></i>
+                  Chat
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="empty-state" *ngIf="confirmedBookings.length === 0">
+          <i class="fa-solid fa-calendar-xmark empty-icon"></i>
+          <h3>Không có lịch sắp tới</h3>
+          <p>Chưa có booking được xác nhận</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOOKINGS TAB -->
+    <div *ngIf="activeTab === 'bookings'">
+      <!-- Filters -->
+      <div class="bookings-filters">
+        <button class="filter-btn" 
+                [class.active]="bookingFilter === 'all'"
+                (click)="setBookingFilter('all')">
+          Tất cả ({{ allBookings.length }})
+        </button>
+        <button class="filter-btn" 
+                [class.active]="bookingFilter === 'pending'"
+                (click)="setBookingFilter('pending')">
+          Chờ xác nhận ({{ pendingBookings.length }})
+        </button>
+        <button class="filter-btn" 
+                [class.active]="bookingFilter === 'confirmed'"
+                (click)="setBookingFilter('confirmed')">
+          Đã xác nhận ({{ confirmedBookings.length }})
+        </button>
+        <button class="filter-btn" 
+                [class.active]="bookingFilter === 'completed'"
+                (click)="setBookingFilter('completed')">
+          Hoàn thành ({{ completedBookings.length }})
+        </button>
+        <button class="filter-btn" 
+                [class.active]="bookingFilter === 'cancelled'"
+                (click)="setBookingFilter('cancelled')">
+          Đã hủy ({{ cancelledBookings.length }})
+        </button>
+      </div>
+
+      <!-- Bookings List -->
+      <div class="bookings-list" *ngIf="filteredBookings.length > 0">
+        <div class="booking-card" *ngFor="let booking of filteredBookings">
+          <div class="booking-header">
+            <div class="booking-id">
+              <i class="fa-solid fa-hashtag"></i>
+              Booking #{{ booking.id }}
+            </div>
+            <span class="booking-status" [ngClass]="getBookingStatusClass(booking.status)">
+              {{ getBookingStatusText(booking.status) }}
+            </span>
+          </div>
+
+          <div class="booking-body">
+            <div class="booking-customer-info">
+              <div class="info-label">Khách hàng</div>
+              <div class="info-value">
+                <i class="fa-solid fa-user"></i>
+                {{ booking.renterName }}
+              </div>
+              <div class="info-value" style="margin-top: 5px;">
+                <i class="fa-solid fa-envelope"></i>
+                {{ booking.renterEmail }}
+              </div>
+            </div>
+
+            <div class="booking-dates-info">
+              <div class="info-label">Thời gian thuê</div>
+              <div class="info-value">
+                <i class="fa-solid fa-calendar-check"></i>
+                {{ formatDate(booking.startDate) }}
+              </div>
+              <div class="info-value" style="margin-top: 5px;">
+                <i class="fa-solid fa-calendar-xmark"></i>
+                {{ formatDate(booking.endDate) }}
+              </div>
+            </div>
+          </div>
+
+          <div class="booking-body">
+            <div class="booking-customer-info">
+              <div class="info-label">Phương thức thanh toán</div>
+              <div class="info-value">
+                <i class="fa-solid fa-credit-card"></i>
+                {{ booking.paymentMethod === 'PAYOS' ? 'PayOS' : 'Tiền mặt' }}
+              </div>
+            </div>
+
+            <div class="booking-dates-info">
+              <div class="info-label">Phương thức giao xe</div>
+              <div class="info-value">
+                <i class="fa-solid fa-truck"></i>
+                {{ booking.deliveryMethod === 'DELIVERY' ? 'Giao xe tận nơi' : 'Nhận tại chỗ' }}
+              </div>
+            </div>
+          </div>
+
+          <div class="booking-footer">
+            <div class="booking-price">{{ formatPrice(booking.totalPrice) }}đ</div>
+            <div class="booking-actions-group">
+              <button class="approve-btn" 
+                      *ngIf="booking.status === 'PENDING'"
+                      (click)="approveBooking(booking.id)">
+                <i class="fa-solid fa-check"></i>
+                Xác nhận
+              </button>
+              <button class="reject-btn" 
+                      *ngIf="booking.status === 'PENDING'"
+                      (click)="rejectBooking(booking.id)">
+                <i class="fa-solid fa-times"></i>
+                Từ chối
+              </button>
+              <button class="complete-btn" 
+                      *ngIf="canCompleteBooking(booking)"
+                      (click)="completeBooking(booking.id)">
+                <i class="fa-solid fa-flag-checkered"></i>
+                Hoàn thành
+              </button>
+              <button class="chat-btn">
+                <i class="fa-solid fa-comment"></i>
+                Chat
+              </button>
+              <button class="chat-btn">
+                <i class="fa-solid fa-eye"></i>
+                Chi tiết
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty-state" *ngIf="filteredBookings.length === 0">
+        <i class="fa-solid fa-inbox empty-icon"></i>
+        <h3>Không có booking nào</h3>
+        <p>Chưa có booking trong danh mục này</p>
+      </div>
+    </div>
+
+    <!-- SETTINGS TAB -->
+    <div *ngIf="activeTab === 'settings' && car">
+      <!-- Basic Information -->
+      <div class="settings-section">
+        <div class="settings-header">
+          <h2 class="section-title">
+            <i class="fa-solid fa-info-circle"></i>
+            Thông tin cơ bản
+          </h2>
+          <button class="edit-btn" *ngIf="!isEditingBasicInfo" (click)="toggleEditBasicInfo()">
+            <i class="fa-solid fa-edit"></i>
+            Chỉnh sửa
+          </button>
+        </div>
+
+        <div *ngIf="!isEditingBasicInfo">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Hãng xe</label>
+              <input type="text" [value]="car.brand" disabled />
+            </div>
+            <div class="form-group">
+              <label>Dòng xe</label>
+              <input type="text" [value]="car.model" disabled />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Biển số xe</label>
+              <input type="text" [value]="car.licensePlate" disabled />
+            </div>
+            <div class="form-group">
+              <label>Loại xe</label>
+              <input type="text" [value]="car.type" disabled />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Địa chỉ</label>
+            <input type="text" [value]="car.address" disabled />
+          </div>
+          <div class="form-group">
+            <label>Mô tả</label>
+            <textarea [value]="car.description" disabled rows="4"></textarea>
+          </div>
+        </div>
+
+        <div *ngIf="isEditingBasicInfo && car">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Hãng xe</label>
+              <input type="text" [(ngModel)]="car.brand" />
+            </div>
+            <div class="form-group">
+              <label>Dòng xe</label>
+              <input type="text" [(ngModel)]="car.model" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Biển số xe</label>
+              <input type="text" [(ngModel)]="car.licensePlate" />
+            </div>
+            <div class="form-group">
+              <label>Loại xe</label>
+              <select [(ngModel)]="car.type">
+                <option value="Sedan">Sedan</option>
+                <option value="SUV">SUV</option>
+                <option value="Hatchback">Hatchback</option>
+                <option value="MPV">MPV</option>
+                <option value="Pickup">Pickup</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Địa chỉ</label>
+            <input type="text" [(ngModel)]="car.address" />
+          </div>
+          <div class="form-group">
+            <label>Mô tả</label>
+            <textarea [(ngModel)]="car.description" rows="4"></textarea>
+          </div>
+          <div>
+            <button class="save-btn" (click)="saveBasicInfo()">
+              <i class="fa-solid fa-save"></i>
+              Lưu thay đổi
+            </button>
+            <button class="cancel-btn" (click)="toggleEditBasicInfo()">
+              Hủy
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pricing Settings -->
+      <div class="settings-section">
+        <div class="settings-header">
+          <h2 class="section-title">
+            <i class="fa-solid fa-dollar-sign"></i>
+            Giá & Chính sách
+          </h2>
+          <button class="edit-btn" *ngIf="!isEditingPricing" (click)="toggleEditPricing()">
+            <i class="fa-solid fa-edit"></i>
+            Chỉnh sửa
+          </button>
+        </div>
+
+        <div *ngIf="!isEditingPricing">
+          <div class="form-group">
+            <label>Giá thuê mỗi ngày</label>
+            <input type="text" [value]="formatPrice(car.pricePerDay) + ' VNĐ'" disabled />
+          </div>
+        </div>
+
+        <div *ngIf="isEditingPricing && car">
+          <div class="form-group">
+            <label>Giá thuê mỗi ngày (VNĐ)</label>
+            <input type="number" [(ngModel)]="car.pricePerDay" />
+          </div>
+          <div>
+            <button class="save-btn" (click)="savePricing()">
+              <i class="fa-solid fa-save"></i>
+              Lưu thay đổi
+            </button>
+            <button class="cancel-btn" (click)="toggleEditPricing()">
+              Hủy
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Status Settings -->
+      <div class="settings-section">
+        <div class="settings-header">
+          <h2 class="section-title">
+            <i class="fa-solid fa-toggle-on"></i>
+            Trạng thái & Khả dụng
+          </h2>
+          <button class="edit-btn" *ngIf="!isEditingStatus" (click)="toggleEditStatus()">
+            <i class="fa-solid fa-edit"></i>
+            Chỉnh sửa
+          </button>
+        </div>
+
+        <div *ngIf="!isEditingStatus">
+          <div class="form-group">
+            <label>Trạng thái xe</label>
+            <input type="text" [value]="car.status" disabled />
+          </div>
+        </div>
+
+        <div *ngIf="isEditingStatus && car">
+          <div class="form-group">
+            <label>Trạng thái xe</label>
+            <select [(ngModel)]="car.status">
+              <option value="AVAILABLE">Sẵn sàng cho thuê</option>
+              <option value="UNAVAILABLE">Tạm ngưng</option>
+              <option value="INACTIVE">Không hoạt động</option>
+            </select>
+          </div>
+          <div>
+            <button class="save-btn" (click)="saveStatus()">
+              <i class="fa-solid fa-save"></i>
+              Lưu thay đổi
+            </button>
+            <button class="cancel-btn" (click)="toggleEditStatus()">
+              Hủy
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Danger Zone -->
+      <div class="danger-zone">
+        <h3 class="danger-zone-title">
+          <i class="fa-solid fa-exclamation-triangle"></i>
+          Vùng nguy hiểm
+        </h3>
+        <p class="danger-zone-text">
+          Xóa xe sẽ xóa vĩnh viễn tất cả thông tin và lịch sử booking. Hành động này không thể hoàn tác.
+        </p>
+        <button class="delete-btn" (click)="deleteCar()">
+          <i class="fa-solid fa-trash"></i>
+          Xóa xe này
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Confirm Dialog Modal -->
+<div class="modal-overlay" *ngIf="showConfirmModal" (click)="closeConfirmDialog()">
+  <div class="modal-dialog" [ngClass]="'modal-' + confirmModalData?.type" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 class="modal-title">{{ confirmModalData?.title }}</h2>
+      <button class="modal-close" (click)="closeConfirmDialog()">
+        <i class="fa-solid fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body" [innerHTML]="confirmModalData?.message"></div>
+    <div class="modal-footer">
+      <button class="btn-cancel" *ngIf="confirmModalData?.showCancel" (click)="cancelDialogAction()">
+        {{ confirmModalData?.cancelText }}
+      </button>
+      <button class="btn-confirm" [ngClass]="'btn-' + confirmModalData?.type" (click)="confirmDialogAction()">
+        {{ confirmModalData?.confirmText }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Notification Modal -->
+<div class="modal-overlay" *ngIf="showNotificationModal" (click)="closeNotificationModal()">
+  <div class="notification-modal" [ngClass]="'notification-' + notificationModalData?.type" (click)="$event.stopPropagation()">
+    <div class="notification-icon">
+      <i class="fa-solid" [ngClass]="{
+        'fa-check-circle': notificationModalData?.type === 'success',
+        'fa-exclamation-circle': notificationModalData?.type === 'error',
+        'fa-info-circle': notificationModalData?.type === 'info'
+      }"></i>
+    </div>
+    <h2 class="notification-title">{{ notificationModalData?.title }}</h2>
+    <p class="notification-message" [innerHTML]="notificationModalData?.message"></p>
+    <button class="notification-close" (click)="closeNotificationModal()">Đóng</button>
+  </div>
+</div>

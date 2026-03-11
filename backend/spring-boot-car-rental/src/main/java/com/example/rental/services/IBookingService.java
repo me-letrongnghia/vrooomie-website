@@ -10,6 +10,8 @@ public interface IBookingService {
     BookingResponse createBooking(BookingRequest request, User renter);
     void confirmBooking(Long bookingId, User currentUser);
     void cancelBooking(Long bookingId, User currentUser);
+    void completeBooking(Long bookingId, User currentUser);
+    void autoCompleteExpiredBookings();
     List<BookingResponse> getBookingsByRenter(User renter);
     List<BookingResponse> getBookingsForOwnedCars(User owner);
     List<BookingResponse> getBookingsForOwnedCarsByStatus(User owner, String status);
