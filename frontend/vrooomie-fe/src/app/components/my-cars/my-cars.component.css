@@ -1,3 +1,47 @@
+﻿/* My Cars Component Styles */
+.my-cars-container {
+  max-width: 100%;
+  min-height: 100vh;
+  background-color: #f6f6f6;
+  padding-top: 40px;
+}
+
+.page-header {
+  margin-bottom: 30px;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 46px;
+  gap: 20px;
+}
+
+.header-content h1 {
+  font-size: 32px;
+  font-weight: bold;
+  color: #333;
+  margin: 0 0 8px 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-content h1 i {
+  color: #5fcf86;
+}
+
+.header-content p {
+  margin: 0;
+  color: #666;
+  font-size: 16px;
+}
+
+.add-car-btn {
+  white-space: nowrap;
+}
+
 .user-detail-container {
   max-width: 100%;
   min-height: 100vh;
@@ -288,11 +332,9 @@
 
 /* Empty States */
 .empty-state {
-  background-color: white;
-  border-radius: 12px;
   padding: 60px 30px;
   text-align: center;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin: 0 46px;
 }
 
 .empty-icon {
@@ -347,8 +389,7 @@
 
 .form-group input:focus {
   outline: none;
-  border-color: #2196f3;
-  box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
+  border-color: #5fcf86;
 }
 
 /* Warning Box */
@@ -532,6 +573,7 @@
   align-items: center;
   min-height: 300px;
   border-radius: 12px;
+  padding: 0 46px;
 }
 
 .dots-loader {
@@ -584,11 +626,7 @@
   background-color: white;
   border-radius: 12px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.error-message {
-  text-align: center;
-  padding: 40px;
+  margin: 0 46px;
 }
 
 .error-message i {
@@ -722,6 +760,7 @@
 .cars-list {
   display: grid;
   gap: 20px;
+  padding: 0 46px;
 }
 
 .cars-list .car-item {
@@ -731,6 +770,7 @@
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   overflow: hidden;
   transition: all 0.3s ease;
+  cursor: pointer;
 }
 
 .cars-list .car-item:hover {
@@ -813,7 +853,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
+  font-size: 16px;
   transition: all 0.3s ease;
 }
 
@@ -828,12 +868,12 @@
 }
 
 .edit-btn {
-  background-color: #ff9800;
+  background-color: #5fcf86;
   color: white;
 }
 
 .edit-btn:hover {
-  background-color: #f57c00;
+  background-color: #5fcf86;
   transform: translateY(-1px);
 }
 
@@ -1046,11 +1086,11 @@
 }
 
 .create-car-form .form-group label {
-  display: block;
+  display: flex;
   margin-bottom: 10px;
   font-weight: 600;
   color: #333;
-  font-size: 16px;
+  font-size: 20px;
 }
 
 .create-car-form .required {
@@ -1068,7 +1108,6 @@
   font-size: 16px;
   box-sizing: border-box;
   transition: all 0.2s ease;
-  font-family: inherit;
 }
 
 .create-car-form .form-group input:focus,
@@ -1076,7 +1115,6 @@
 .create-car-form .form-group textarea:focus {
   outline: none;
   border-color: #5fcf86;
-  box-shadow: 0 0 0 3px rgba(95, 207, 134, 0.1);
 }
 
 .create-car-form .form-group input.error,
@@ -1102,7 +1140,7 @@
   display: block;
   color: #999;
   font-size: 14px;
-  margin-top: 8px;
+  margin-top: 16px;
   font-style: italic;
 }
 
@@ -1199,7 +1237,7 @@
 .toggle-btn {
   flex: 1;
   padding: 14px 20px;
-  border: 2px solid #e0e0e0;
+  border: 1px solid #e0e0e0;
   background: white;
   border-radius: 8px;
   font-size: 16px;
@@ -1220,8 +1258,8 @@
 
 .toggle-btn.active {
   border-color: #5fcf86;
-  background-color: #f1f8f4;
-  color: #5fcf86;
+  background-color: #5fcf86;
+  color: #ffffff;
   font-weight: 600;
 }
 
@@ -1658,18 +1696,6 @@
 }
 
 /* Loading State for Bookings */
-.loading-container {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  min-height: 300px;
-  background-color: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  gap: 16px;
-}
-
 .spinner {
   width: 48px;
   height: 48px;
@@ -1851,7 +1877,7 @@
   width: 100%;
   height: 350px;
   border-radius: 8px;
-  border: 2px solid #e0e0e0;
+  border: 1px solid #e0e0e0;
   overflow: hidden;
   cursor: crosshair;
 }
@@ -1907,4 +1933,5 @@
 .custom-marker-icon svg {
   filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
 }
+
 

@@ -269,10 +269,51 @@
           <p>Lịch sử các chuyến đi của bạn</p>
         </div>
 
+        <!-- Booking Status Filter -->
+        <div *ngIf="!bookingsLoading && !bookingsError && userBookings.length > 0" class="booking-status-filter">
+          <button 
+            class="filter-btn" 
+            [class.active]="selectedBookingStatus === 'ALL'"
+            (click)="onBookingStatusFilterChange('ALL')"
+          >
+            <i class="fa-solid fa-list"></i>
+            Tất cả
+            <span class="count-badge">{{ getBookingCountByStatus('ALL') }}</span>
+          </button>
+          <button 
+            class="filter-btn" 
+            [class.active]="selectedBookingStatus === 'PENDING'"
+            (click)="onBookingStatusFilterChange('PENDING')"
+          >
+            <i class="fa-solid fa-clock"></i>
+            Chờ xác nhận
+            <span class="count-badge">{{ getBookingCountByStatus('PENDING') }}</span>
+          </button>
+          <button 
+            class="filter-btn" 
+            [class.active]="selectedBookingStatus === 'CONFIRMED'"
+            (click)="onBookingStatusFilterChange('CONFIRMED')"
+          >
+            <i class="fa-solid fa-check-circle"></i>
+            Đã xác nhận
+            <span class="count-badge">{{ getBookingCountByStatus('CONFIRMED') }}</span>
+          </button>
+          <button 
+            class="filter-btn" 
+            [class.active]="selectedBookingStatus === 'CANCELED'"
+            (click)="onBookingStatusFilterChange('CANCELED')"
+          >
+            <i class="fa-solid fa-times-circle"></i>
+            Đã hủy
+            <span class="count-badge">{{ getBookingCountByStatus('CANCELED') }}</span>
+          </button>
+        </div>
+
         <!-- Loading State -->
         <div *ngIf="bookingsLoading" class="loading-container">
-          <div class="spinner"></div>
-          <p>Đang tải danh sách chuyến đi...</p>
+          <div class="dots-loader">
+            <span></span><span></span><span></span>
+          </div>
         </div>
 
         <!-- Error State -->
@@ -290,9 +331,16 @@
           <button class="primary-btn" [routerLink]="['/']">Tìm xe</button>
         </div>
 
+        <!-- Empty Filter State -->
+        <div *ngIf="!bookingsLoading && !bookingsError && userBookings.length > 0 && filteredUserBookings.length === 0" class="empty-state">
+          <i class="fa-solid fa-filter empty-icon"></i>
+          <p>Không tìm thấy chuyến đi nào</p>
+          <p>Không có chuyến đi với trạng thái "{{ getBookingStatusText(selectedBookingStatus) }}"</p>
+        </div>
+
         <!-- Bookings List -->
-        <div *ngIf="!bookingsLoading && !bookingsError && userBookings.length > 0" class="bookings-grid">
-          <div *ngFor="let booking of userBookings" class="booking-card">
+        <div *ngIf="!bookingsLoading && !bookingsError && filteredUserBookings.length > 0" class="bookings-grid">
+          <div *ngFor="let booking of filteredUserBookings" class="booking-card">
             <div class="booking-header">
               <div class="booking-id">
                 <i class="fa-solid fa-hashtag"></i>

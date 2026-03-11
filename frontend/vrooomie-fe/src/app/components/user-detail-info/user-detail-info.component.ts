@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, AfterViewInit } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { CarService, CarCreateRequest } from '../../services/car.service';
 import { BookingService, BookingResponse } from '../../services/booking.service';
 import { Car } from '../../models/car.interface';
@@ -22,6 +22,7 @@ export class UserDetailInfoComponent implements OnInit, OnDestroy {
   loading: boolean = false;
   error: string | null = null;
   private authSubscription: Subscription | null = null;
+  private pendingTabParam: string | null = null;
 
   // User's cars
   userCars: Car[] = [];
@@ -30,6 +31,8 @@ export class UserDetailInfoComponent implements OnInit, OnDestroy {
 
   // User's bookings
   userBookings: BookingResponse[] = [];
+  filteredUserBookings: BookingResponse[] = [];
+  selectedBookingStatus: string = 'ALL';
   bookingsLoading: boolean = false;
   bookingsError: string | null = null;
 
@@ -54,6 +57,7 @@ export class UserDetailInfoComponent implements OnInit, OnDestroy {
   constructor(
     private authService: AuthService,
     private router: Router,
+    private route: ActivatedRoute,
     private carService: CarService,
     private bookingService: BookingService,
     private fb: FormBuilder,
@@ -139,11 +143,11 @@ export class UserDetailInfoComponent implements OnInit, OnDestroy {
         break;
       case 'my-cars':
         console.log('Navigating to my cars page');
-        this.loadUserCars();
+        this.router.navigate(['/my-cars']);
         break;
       case 'my-trips':
         console.log('Navigating to my trips page');
-        this.loadUserBookings();
+        this.router.navigate(['/my-trips']);
         break;
       case 'long-term-rental':
         console.log('Navigating to long term rental page');
@@ -169,6 +173,15 @@ export class UserDetailInfoComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    // Check for tab query parameter and save it
+    this.route.queryParams.subscribe(params => {
+      const tabParam = params['tab'];
+      if (tabParam) {
+        this.activeMenu = tabParam;
+        this.pendingTabParam = tabParam; // Save for later use
+      }
+    });
+
     // Check authentication state first
     this.authSubscription = this.authService.authLoading$.subscribe(authLoading => {
       if (!authLoading) {
@@ -292,6 +305,16 @@ export class UserDetailInfoComponent implements OnInit, OnDestroy {
       next: (data: any) => {
         this.userDetail = data;
         this.loading = false;
+        
+        // After user detail is loaded, load data for pending tab
+        if (this.pendingTabParam) {
+          if (this.pendingTabParam === 'my-cars') {
+            this.loadUserCars();
+          } else if (this.pendingTabParam === 'my-trips') {
+            this.loadUserBookings();
+          }
+          this.pendingTabParam = null; // Clear after use
+        }
       },
       error: (error) => {
         console.error('Error fetching user detail:', error);
@@ -379,6 +402,7 @@ export class UserDetailInfoComponent implements OnInit, OnDestroy {
     this.bookingService.getMyBookings().subscribe({
       next: (bookings) => {
         this.userBookings = bookings;
+        this.filterBookingsByStatus();
         this.bookingsLoading = false;
         console.log('User bookings loaded:', bookings);
       },
@@ -404,41 +428,30 @@ export class UserDetailInfoComponent implements OnInit, OnDestroy {
     return new Intl.NumberFormat('vi-VN').format(price);
   }
 
-  // Get status text for car
-  getStatusText(status: string): string {
-    switch (status) {
-      case 'AVAILABLE': return 'Có sẵn';
-      case 'BOOKED': return 'Đã thuê';
-      case 'UNAVAILABLE': return 'Bảo trì';
-      default: return status;
+  // Booking filter methods
+  onBookingStatusFilterChange(status: string): void {
+    this.selectedBookingStatus = status;
+    this.filterBookingsByStatus();
+  }
+
+  filterBookingsByStatus(): void {
+    if (this.selectedBookingStatus === 'ALL') {
+      this.filteredUserBookings = this.userBookings;
+    } else if (this.selectedBookingStatus === 'CANCELED') {
+      this.filteredUserBookings = this.userBookings.filter(b => b.status === 'CANCELED' || b.status === 'CANCELLED');
+    } else {
+      this.filteredUserBookings = this.userBookings.filter(b => b.status === this.selectedBookingStatus);
     }
   }
 
-  // Get status class for car
-  getStatusClass(status: string): string {
-    switch (status) {
-      case 'AVAILABLE': return 'status-available';
-      case 'BOOKED': return 'status-rented';
-      case 'UNAVAILABLE': return 'status-maintenance';
-      default: return 'status-unknown';
+  getBookingCountByStatus(status: string): number {
+    if (status === 'ALL') {
+      return this.userBookings.length;
+    } else if (status === 'CANCELED') {
+      return this.userBookings.filter(b => b.status === 'CANCELED' || b.status === 'CANCELLED').length;
+    } else {
+      return this.userBookings.filter(b => b.status === status).length;
     }
-  }
-
-  // Navigate to car detail
-  onViewCar(carId: number): void {
-    this.router.navigate(['/cars', carId]);
-  }
-
-  // Edit car functionality (placeholder)
-  onEditCar(carId: number): void {
-    console.log('Edit car:', carId);
-    // TODO: Navigate to edit car page
-  }
-
-  // Delete car functionality (placeholder)
-  onDeleteCar(carId: number): void {
-    console.log('Delete car:', carId);
-    // TODO: Show confirmation dialog and delete car
   }
 
   // Booking display methods
@@ -734,6 +747,120 @@ export class UserDetailInfoComponent implements OnInit, OnDestroy {
     const fileInput = document.getElementById('fileInput') as HTMLInputElement;
     if (fileInput) {
       fileInput.value = '';
+    }
+  }
+
+  // Car management methods
+  onViewCar(carId: number): void {
+    // Navigate to car management dashboard
+    this.router.navigate(['/car-management', carId]);
+  }
+
+  onEditCar(carId: number): void {
+    // Navigate to car management dashboard with settings tab
+    this.router.navigate(['/car-management', carId], { queryParams: { tab: 'settings' } });
+  }
+
+  onDeleteCar(carId: number): void {
+    // First, check if the car has any active bookings
+    this.bookingService.getCarBookings(carId).subscribe({
+      next: (bookings) => {
+        // Filter active bookings (PENDING or CONFIRMED)
+        const activeBookings = bookings.filter(
+          b => b.status === 'PENDING' || b.status === 'CONFIRMED'
+        );
+
+        if (activeBookings.length > 0) {
+          // Car has active bookings - CANNOT delete
+          const pendingCount = activeBookings.filter(b => b.status === 'PENDING').length;
+          const confirmedCount = activeBookings.filter(b => b.status === 'CONFIRMED').length;
+          
+          let errorMessage = '🚫 KHÔNG THỂ XÓA XE\n\n';
+          errorMessage += `Xe này còn ${activeBookings.length} booking đang hoạt động:\n`;
+          if (pendingCount > 0) {
+            errorMessage += `   • ${pendingCount} booking đang chờ duyệt\n`;
+          }
+          if (confirmedCount > 0) {
+            errorMessage += `   • ${confirmedCount} booking đã xác nhận\n`;
+          }
+          errorMessage += `\n📋 ĐỂ XÓA XE NÀY:\n`;
+          errorMessage += `   1. Click "Xem chi tiết" để vào trang quản lý xe\n`;
+          errorMessage += `   2. Vào tab "Quản lý booking"\n`;
+          errorMessage += `   3. Hủy tất cả ${activeBookings.length} booking đang hoạt động\n`;
+          errorMessage += `   4. Sau đó quay lại để xóa xe\n`;
+          errorMessage += `\n💡 GỢI Ý: Thay vì xóa, bạn có thể tạm ngưng xe`;
+          
+          alert(errorMessage);
+        } else {
+          // No active bookings - safe to delete with simple confirmation
+          const simpleConfirm = confirm(
+            '🗑️ Xóa xe này?\n\n' +
+            '✓ Xe không có booking đang hoạt động\n' +
+            '✓ An toàn để xóa\n\n' +
+            'Bạn có chắc muốn xóa xe này không?\n' +
+            '(Hành động này không thể hoàn tác)'
+          );
+          
+          if (simpleConfirm) {
+            this.performCarDeletion(carId);
+          }
+        }
+      },
+      error: (err) => {
+        console.error('Error checking car bookings:', err);
+        // If can't fetch bookings, show error and don't allow deletion
+        alert(
+          '⚠️ Không thể kiểm tra booking của xe\n\n' +
+          'Vui lòng thử lại sau hoặc liên hệ hỗ trợ.'
+        );
+      }
+    });
+  }
+
+  // Helper method to perform actual car deletion
+  private performCarDeletion(carId: number): void {
+    this.carService.deleteCar(carId).subscribe({
+      next: () => {
+        alert('✅ Đã xóa xe thành công!');
+        this.loadUserCars(); // Reload car list
+      },
+      error: (err) => {
+        console.error('Error deleting car:', err);
+        if (err.status === 409) {
+          // Conflict - car has dependencies
+          alert(
+            '❌ Không thể xóa xe!\n\n' +
+            'Xe này có dữ liệu liên quan (booking, đánh giá, v.v.)\n' +
+            'Vui lòng liên hệ quản trị viên để được hỗ trợ.'
+          );
+        } else if (err.status === 403) {
+          alert('❌ Bạn không có quyền xóa xe này!');
+        } else {
+          alert(
+            '❌ Có lỗi xảy ra khi xóa xe\n\n' +
+            'Vui lòng thử lại sau hoặc liên hệ hỗ trợ.'
+          );
+        }
+      }
+    });
+  }
+
+  // Utility methods for car display
+  getStatusClass(status: string): string {
+    switch (status) {
+      case 'AVAILABLE': return 'status-available';
+      case 'BOOKED': return 'status-rented';
+      case 'UNAVAILABLE': return 'status-maintenance';
+      default: return 'status-unknown';
+    }
+  }
+
+  getStatusText(status: string): string {
+    switch (status) {
+      case 'AVAILABLE': return 'Có sẵn';
+      case 'BOOKED': return 'Đã thuê';
+      case 'UNAVAILABLE': return 'Bảo trì';
+      default: return status;
     }
   }
 }

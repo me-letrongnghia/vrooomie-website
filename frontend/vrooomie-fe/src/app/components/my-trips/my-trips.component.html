@@ -1,0 +1,151 @@
+<div class="my-trips-container">
+  <div class="page-header">
+    <h1><i class="fa-solid fa-road"></i> Chuyến của tôi</h1>
+    <p>Lịch sử các chuyến đi của bạn</p>
+  </div>
+
+  <!-- Booking Status Filter -->
+  <div *ngIf="!bookingsLoading && !bookingsError && userBookings.length > 0" class="booking-status-filter">
+    <button 
+      class="filter-btn" 
+      [class.active]="selectedBookingStatus === 'ALL'"
+      (click)="onBookingStatusFilterChange('ALL')"
+    >
+      Tất cả ({{ getBookingCountByStatus('ALL') }})
+    </button>
+    <button 
+      class="filter-btn" 
+      [class.active]="selectedBookingStatus === 'PENDING'"
+      (click)="onBookingStatusFilterChange('PENDING')"
+    >
+      Chờ xác nhận ({{ getBookingCountByStatus('PENDING') }})
+    </button>
+    <button 
+      class="filter-btn" 
+      [class.active]="selectedBookingStatus === 'CONFIRMED'"
+      (click)="onBookingStatusFilterChange('CONFIRMED')"
+    >
+      Đã xác nhận ({{ getBookingCountByStatus('CONFIRMED') }})
+    </button>
+    <button 
+      class="filter-btn" 
+      [class.active]="selectedBookingStatus === 'COMPLETED'"
+      (click)="onBookingStatusFilterChange('COMPLETED')"
+    >
+      Hoàn thành ({{ getBookingCountByStatus('COMPLETED') }})
+    </button>
+    <button 
+      class="filter-btn" 
+      [class.active]="selectedBookingStatus === 'CANCELED'"
+      (click)="onBookingStatusFilterChange('CANCELED')"
+    >
+      Đã hủy ({{ getBookingCountByStatus('CANCELED') }})
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="bookingsLoading" class="loading-container">
+    <div class="dots-loader">
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="bookingsError && !bookingsLoading" class="error-container">
+    <div class="error-message">
+      <i class="fa-solid fa-exclamation-triangle"></i>
+      <h3>Có lỗi xảy ra</h3>
+      <p>{{ bookingsError }}</p>
+      <button class="primary-btn" (click)="loadUserBookings()">Thử lại</button>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!bookingsLoading && !bookingsError && userBookings.length === 0" class="empty-state">
+    <i class="fa-solid fa-road empty-icon"></i>
+    <p>Bạn chưa có chuyến đi nào</p>
+    <p>Hãy thuê xe và bắt đầu cuộc phiêu lưu của bạn!</p>
+    <button class="primary-btn" [routerLink]="['/']">Tìm xe</button>
+  </div>
+
+  <!-- Empty Filter State -->
+  <div *ngIf="!bookingsLoading && !bookingsError && userBookings.length > 0 && filteredUserBookings.length === 0" class="empty-state">
+    <i class="fa-solid fa-filter empty-icon"></i>
+    <p>Không tìm thấy chuyến đi nào</p>
+    <p>Không có chuyến đi với trạng thái "{{ getBookingStatusText(selectedBookingStatus) }}"</p>
+  </div>
+
+  <!-- Bookings List -->
+  <div *ngIf="!bookingsLoading && !bookingsError && filteredUserBookings.length > 0" class="bookings-grid">
+    <div *ngFor="let booking of filteredUserBookings" class="booking-card">
+      <div class="booking-header">
+        <div class="booking-id">
+          <i class="fa-solid fa-hashtag"></i>
+          <span>Mã đơn: {{ booking.id }}</span>
+        </div>
+        <span class="booking-status" [ngClass]="getBookingStatusClass(booking.status)">
+          {{ getBookingStatusText(booking.status) }}
+        </span>
+      </div>
+
+      <div class="booking-car-info">
+        <div class="car-name">
+          <i class="fa-solid fa-car"></i>
+          <span>{{ booking.carBrand }} {{ booking.carModel }}</span>
+        </div>
+        <div class="car-license">
+          <i class="fa-solid fa-id-card"></i>
+          <span>{{ booking.carLicensePlate }}</span>
+        </div>
+      </div>
+
+      <div class="booking-dates">
+        <div class="date-item">
+          <i class="fa-solid fa-calendar-check"></i>
+          <div>
+            <label>Ngày nhận</label>
+            <span>{{ formatBookingDate(booking.startDate) }}</span>
+          </div>
+        </div>
+        <div class="date-separator">
+          <i class="fa-solid fa-arrow-right"></i>
+        </div>
+        <div class="date-item">
+          <i class="fa-solid fa-calendar-xmark"></i>
+          <div>
+            <label>Ngày trả</label>
+            <span>{{ formatBookingDate(booking.endDate) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="booking-payment-info">
+        <div class="payment-method">
+          <label>Phương thức thanh toán:</label>
+          <span>{{ booking.paymentMethod === 'PAYOS' ? 'PayOS' : 'Tiền mặt' }}</span>
+        </div>
+        <div class="delivery-method">
+          <label>Phương thức giao xe:</label>
+          <span>{{ booking.deliveryMethod === 'DELIVERY' ? 'Giao xe tận nơi' : 'Nhận tại địa chỉ chủ xe' }}</span>
+        </div>
+        <div class="payment-status">
+          <label>Trạng thái thanh toán:</label>
+          <span [ngClass]="getPaymentStatusClass(booking.paymentStatus)">
+            {{ getPaymentStatusText(booking.paymentStatus) }}
+          </span>
+        </div>
+      </div>
+
+      <div class="booking-footer">
+        <div class="total-price">
+          <label>Tổng tiền:</label>
+          <span class="price">{{ formatPrice(booking.totalPrice) }}đ</span>
+        </div>
+        <button class="view-detail-btn" (click)="onViewBooking(booking.id)">
+          <i class="fa-solid fa-eye"></i>
+          Chi tiết
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
